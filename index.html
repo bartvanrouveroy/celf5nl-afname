@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CELF-5-NL Digitale Afname · Logopedie Sophie</title>
+<title>CELF-5-NL · Logopedie Sophie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -18,6 +18,7 @@ nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
 nav button{border:0;background:transparent;padding:8px 14px;border-radius:10px;font:inherit;font-weight:700;color:var(--mute);cursor:pointer}
 nav button.on{background:var(--acc2);color:var(--acc)}
 main{max-width:1180px;margin:0 auto;padding:20px}
+main.wide{max-width:none;padding:12px 16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
 .card h2{margin:0 0 12px;font-size:17px}
 .card h3{margin:14px 0 8px;font-size:15px}
@@ -102,10 +103,11 @@ body.kindvenster #kindView{display:flex}
 </head>
 <body>
 <header>
-  <h1>CELF-5-NL Afname <small>Logopedie Sophie</small></h1>
+  <h1>CELF-5-NL <small>afname · analyse · rapport</small></h1>
   <nav id="nav">
     <button data-tab="afname" class="on">Afname</button>
     <button data-tab="resultaten">Resultaten</button>
+    <button data-tab="analyse">Analyse &amp; rapport</button>
     <button data-tab="materiaal">Testmateriaal</button>
     <button data-tab="bewaren">Bewaren &amp; herstellen</button>
   </nav>
@@ -124,7 +126,8 @@ body.kindvenster #kindView{display:flex}
         <button class="btn" id="newSes">+ Nieuwe cliënt</button>
       </div>
       <div class="row" id="sesFields" style="margin-top:12px">
-        <label>Naam<input type="text" id="sesNaam" placeholder="Voornaam Naam"></label>
+        <label>Naam<input type="text" id="sesNaam" placeholder="Familienaam"></label>
+        <label>Voornaam<input type="text" id="sesVoornaam"></label>
         <label>Geboortedatum<input type="date" id="sesGeb"></label>
         <label>Datum afname<input type="date" id="sesDat"></label>
         <label>Leeftijd<input type="text" id="sesLft" readonly style="width:110px"></label>
@@ -133,6 +136,7 @@ body.kindvenster #kindView{display:flex}
     <div class="card">
       <h2>Kies een subtest</h2>
       <table><thead><tr><th>Subtest</th><th>Items</th><th>Status</th><th>Ruwe score</th><th></th></tr></thead><tbody id="stList"></tbody></table>
+      <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn p" id="toAnaBtn">Naar analyse &amp; rapport →</button></div>
     </div>
   </div>
 
@@ -173,6 +177,895 @@ body.kindvenster #kindView{display:flex}
     <p class="mute" style="margin-top:0">Ruwe scores per subtest. Zet ze over naar de CELF-5-NL Analyse-app om er normscores, het profiel en het verslag van te maken.</p>
     <div id="resList"></div>
   </div>
+</section>
+
+<!-- ANALYSE -->
+<section id="tab-analyse" style="display:none">
+  <div class="row hide-kind" style="margin-bottom:8px;align-items:center">
+    <label style="flex-direction:row;align-items:center;gap:8px">Ruwe scores overnemen van<select id="anaSes"></select></label>
+    <button class="btn p" id="anaImport">Overnemen in analyse</button>
+    <span class="mute" style="font-size:13px">Daarna vul je de geschaalde scores, percentielen en leeftijdsequivalenten in uit de handleiding.</span>
+  </div>
+  <iframe id="anaFrame" title="CELF-5-NL Analyse" style="width:100%;height:calc(100vh - 150px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:#fff" srcdoc="<!DOCTYPE html>
+<html lang=&quot;nl-BE&quot;>
+<head>
+<meta charset=&quot;utf-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;>
+<title>CELF-5-NL Analyse</title>
+<style>
+:root{
+  --ink:#1d2a30; --muted:#5d6b72; --line:#d9e1e4; --bg:#f3f6f7; --card:#fff;
+  --brand:#3f5f86; --brand2:#6b8cb5; --accent:#eaf0f7;
+  --ok:#2e7d4f; --okbg:#e4f2e8; --grens:#8a6d00; --grensbg:#fbf3cf;
+  --zwak:#b45a06; --zwakbg:#fde8d3; --ernstig:#b3261e; --ernstigbg:#fbe0de;
+  --boven:#1d5fa8; --bovenbg:#e1ecf8;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:14px/1.45 &quot;Segoe UI&quot;,system-ui,-apple-system,&quot;Helvetica Neue&quot;,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 18px;box-shadow:0 1px 0 rgba(0,0,0,.15)}
+header.bar h1{font-size:17px;margin:0 14px 0 0;font-weight:650;letter-spacing:.2px}
+header.bar h1 small{font-weight:400;opacity:.75;margin-left:6px;font-size:12px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--brand2)}
+.btn.primary{background:var(--brand2);border-color:var(--brand2);color:#fff}
+.btn.primary:hover{background:#5a7aa3}
+header .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#fff}
+header .btn:hover{background:rgba(255,255,255,.2);border-color:#fff}
+header .btn.primary{background:#fff;color:var(--brand);border-color:#fff}
+.menuwrap{position:relative}
+.menu{display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px;min-width:340px;z-index:30}
+.menu.show{display:block}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:6px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.menu button:hover{background:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:disabled:hover{border-color:rgba(255,255,255,.28)}
+.btn.small{padding:4px 9px;font-size:12px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ernstig)}
+main{display:grid;grid-template-columns:minmax(560px,1fr) minmax(520px,1fr);gap:18px;padding:18px;max-width:1700px;margin:0 auto}
+@media (max-width:1180px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:15px;margin:0 0 12px;color:var(--brand);display:flex;align-items:center;gap:8px}
+.card h2 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--brand);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px 14px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(107,140,181,.3);border-color:var(--brand2)}
+textarea{min-height:74px;resize:vertical}
+.age{margin-top:10px;padding:8px 10px;background:var(--accent);border-radius:7px;font-size:13px}
+.age b{color:var(--brand)}
+table.inp{width:100%;border-collapse:collapse;font-size:13px}
+table.inp th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:left;padding:4px 4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.inp td{padding:4px;border-bottom:1px solid #eef2f3;vertical-align:middle}
+table.inp input,table.inp select{padding:5px 6px}
+table.inp input.num{width:64px;text-align:center}
+table.inp input.le{width:62px;text-align:center}
+table.inp td.c{text-align:center}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.chip.gem{background:var(--okbg);color:var(--ok)}
+.chip.grens{background:var(--grensbg);color:var(--grens)}
+.chip.zwak{background:var(--zwakbg);color:var(--zwak)}
+.chip.ernstig{background:var(--ernstigbg);color:var(--ernstig)}
+.chip.boven{background:var(--bovenbg);color:var(--boven)}
+.chip.leeg{background:#eef1f2;color:var(--muted)}
+.row-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:14px;font-size:13px}
+.opts label{display:flex;align-items:center;gap:6px}
+.opts input{width:auto}
+.checks{border-radius:10px;border:1px solid #f0d9a8;background:#fffaf0;padding:12px 16px;margin-bottom:16px}
+.checks h3{margin:0 0 6px;font-size:13.5px;color:#7a5600}
+.checks ul{margin:0;padding-left:18px}
+.checks li{margin:3px 0;font-size:13px}
+.checks li.err{color:var(--ernstig)}
+.checks.none{border-color:#cfe6d6;background:#f3faf5}
+.checks.none h3{color:var(--ok)}
+.preview-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.preview-head span{font-size:12px;color:var(--muted)}
+.paper{background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:36px 42px;font-family:Calibri,&quot;Segoe UI&quot;,Arial,sans-serif;font-size:14px;color:#222}
+.paper .r-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.paper .r-title{font-size:23px;font-weight:700;color:var(--brand);margin:0 0 2px}
+.paper .r-sub{font-size:12.5px;color:#555;font-style:italic;margin:0 0 14px}
+.paper .r-praktijk{font-size:12px;color:#555;text-align:left}
+.paper .r-praktijk img{max-height:84px;max-width:200px;display:block;margin-bottom:10px}
+.paper h3{font-size:15.5px;color:var(--brand);border-bottom:1.5px solid var(--brand2);padding-bottom:3px;margin:20px 0 8px}
+.paper p{margin:0 0 8px}
+.paper ul{margin:0 0 8px;padding-left:20px}
+.paper li{margin:2px 0}
+.paper table{width:100%;border-collapse:collapse;margin:4px 0 10px;font-size:13px}
+.paper th{white-space:pre-line;background:#e8eef1;font-weight:700;padding:6px 7px;border:1px solid #c5cfd3;text-align:center}
+.paper td{padding:5px 7px;border:1px solid #c5cfd3;text-align:center}
+.paper td.l,.paper th.l{text-align:left}
+.paper table.kv td{text-align:left}
+.paper table.kv td:first-child{width:34%;background:#f5f8f9;font-weight:600}
+.paper canvas{width:100%;height:auto;display:block;margin:4px 0 6px}
+.paper .r-legend{font-size:11.5px;color:#666}
+.paper .r-checks{border:1px dashed #d9a441;background:#fffaf0;padding:8px 12px;border-radius:4px}
+.empty{color:#999;font-style:italic}
+.modal-bg{position:fixed;inset:0;background:rgba(20,30,35,.45);display:none;place-items:center;z-index:50}
+.modal-bg.show{display:grid}
+.modal{background:#fff;border-radius:10px;padding:18px 20px;max-width:440px;width:calc(100% - 40px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.modal p{margin:0 0 14px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d2a30;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;display:flex;gap:12px;align-items:center;max-width:90vw}
+#toast.show{opacity:1;pointer-events:auto}
+#toast button{background:none;border:0;color:#9fe1ec;font:inherit;cursor:pointer;text-decoration:underline;padding:0}
+details.help{font-size:13px;color:var(--muted)}
+details.help summary{cursor:pointer;color:var(--brand);font-weight:600}
+details.help ul{padding-left:18px}
+.drop{outline:3px dashed var(--brand2);outline-offset:-10px}
+.logo-prev{display:flex;align-items:center;gap:10px}
+.logo-prev img{max-height:40px;max-width:120px;border:1px solid var(--line);border-radius:4px;padding:2px;background:#fff}
+@media print{
+  header.bar,#formcol,.checks,.preview-head,#toast,.modal-bg{display:none!important}
+  body{background:#fff}
+  main{display:block;padding:0}
+  .paper{border:0;box-shadow:none;padding:0}
+  @page{size:A4;margin:18mm}
+  .paper table,.paper canvas{break-inside:avoid;page-break-inside:avoid}
+  .paper h3{break-after:avoid;page-break-after:avoid}
+}
+</style>
+</head>
+<body>
+<header class=&quot;bar&quot;>
+  <h1>CELF-5-NL Analyse <small>taalonderzoek · rapport</small></h1>
+  <div class=&quot;tools&quot;>
+    <button class=&quot;btn&quot; id=&quot;bUndo&quot; title=&quot;Stap terug (Ctrl/⌘+Z)&quot; disabled>↶ Terug</button>
+    <button class=&quot;btn&quot; id=&quot;bRedo&quot; title=&quot;Stap vooruit (Ctrl/⌘+Shift+Z)&quot; disabled>↷ Vooruit</button>
+    <button class=&quot;btn&quot; id=&quot;bWis&quot; title=&quot;Alle gegevens van dit dossier wissen&quot;>🗑 Alles wissen</button>
+    <button class=&quot;btn&quot; id=&quot;bOpen&quot; title=&quot;Een eerder opgeslagen dossier (.json) openen&quot;>📂 Openen</button>
+    <div class=&quot;menuwrap&quot;>
+      <button class=&quot;btn&quot; id=&quot;bSave&quot; title=&quot;Opslaan in een map naar keuze&quot;>💾 Opslaan ▾</button>
+      <div class=&quot;menu&quot; id=&quot;saveMenu&quot;>
+        <button data-save=&quot;json&quot;>Dossier (.json) – terug te openen in de app</button>
+        <button data-save=&quot;docx&quot;>Rapport als Word (.docx)</button>
+        <button data-save=&quot;pdf&quot;>Rapport als PDF (.pdf)</button>
+      </div>
+    </div>
+    <button class=&quot;btn primary&quot; id=&quot;bWord&quot; title=&quot;Rapport openen in Word&quot;>📄 Open Word</button>
+    <button class=&quot;btn primary&quot; id=&quot;bPdf&quot; title=&quot;Rapport openen als PDF&quot;>📄 Open PDF</button>
+    <button class=&quot;btn&quot; id=&quot;bPrint&quot; title=&quot;Rapport afdrukken&quot; style=&quot;display:none&quot;>🖶 Afdrukken</button>
+  </div>
+  <input type=&quot;file&quot; id=&quot;fileOpen&quot; accept=&quot;.json,application/json&quot; hidden>
+</header>
+
+<main>
+  <section id=&quot;formcol&quot;>
+    <div class=&quot;card&quot;>
+      <h2><span class=&quot;n&quot;>1</span>Gegevens</h2>
+      <div class=&quot;grid&quot;>
+        <label class=&quot;f&quot;>Naam<input data-p=&quot;kind.naam&quot; autocomplete=&quot;off&quot;></label>
+        <label class=&quot;f&quot;>Voornaam<input data-p=&quot;kind.voornaam&quot; autocomplete=&quot;off&quot;></label>
+        <label class=&quot;f&quot;>Geboortedatum<input type=&quot;date&quot; data-p=&quot;kind.geboortedatum&quot;></label>
+        <label class=&quot;f&quot;>Testdatum<input type=&quot;date&quot; data-p=&quot;kind.testdatum&quot;></label>
+        <label class=&quot;f&quot;>Normgroep
+          <select data-p=&quot;kind.normgroep&quot;><option>Vlaanderen</option><option>Nederland</option></select></label>
+        <label class=&quot;f&quot;>School<input data-p=&quot;kind.school&quot;></label>
+        <label class=&quot;f&quot;>Klas / leerjaar<input data-p=&quot;kind.klas&quot;></label>
+        <label class=&quot;f&quot;>Thuistaal / talen<input data-p=&quot;kind.thuistaal&quot; placeholder=&quot;bv. Nederlands&quot;></label>
+        <label class=&quot;f&quot;>Onderzoeker<input data-p=&quot;kind.onderzoeker&quot;></label>
+        <label class=&quot;f&quot;>Praktijk<input data-p=&quot;kind.praktijk&quot;></label>
+      </div>
+      <div class=&quot;age&quot; id=&quot;ageBox&quot;>Vul geboortedatum en testdatum in om de leeftijd te berekenen.</div>
+      <label class=&quot;f&quot; style=&quot;margin-top:10px&quot;>Reden van aanmelding / vraagstelling<textarea data-p=&quot;reden&quot; rows=&quot;2&quot;></textarea></label>
+      <div class=&quot;logo-prev&quot; style=&quot;margin-top:10px&quot;>
+        <button class=&quot;btn small&quot; id=&quot;bLogo&quot;>Logo kiezen…</button>
+        <span id=&quot;logoInfo&quot; class=&quot;hint&quot; style=&quot;margin:0&quot;>Optioneel: logo bovenaan het rapport</span>
+        <button class=&quot;btn small ghost&quot; id=&quot;bLogoDel&quot; style=&quot;display:none&quot;>verwijderen</button>
+        <input type=&quot;file&quot; id=&quot;fileLogo&quot; accept=&quot;image/*&quot; hidden>
+      </div>
+    </div>
+
+    <div class=&quot;card&quot;>
+      <h2><span class=&quot;n&quot;>2</span>Subtestscores</h2>
+      <table class=&quot;inp&quot; id=&quot;tSub&quot;>
+        <thead><tr><th>Subtest</th><th>Domein</th><th>Ruw</th><th>Geschaald</th><th>Percentiel</th><th>LE (j;m)</th><th title=&quot;Telt mee in de kernscore&quot;>Kern</th><th>Interpretatie</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class=&quot;row-actions&quot;>
+        <button class=&quot;btn small&quot; id=&quot;bAddSub&quot;>＋ Subtest toevoegen</button>
+        <button class=&quot;btn small&quot; id=&quot;bVoorbeeld&quot; title=&quot;Vult de voorbeeldgegevens in&quot;>Voorbeeld laden</button>
+      </div>
+      <p class=&quot;hint&quot;>Geschaalde scores: gem. 10, SD 3. Laat je het percentiel leeg, dan wordt een benadering getoond (≈). Neem voor het rapport de percentielen uit de normtabellen over. Je kunt de naam en het domein van een subtest aanpassen.</p>
+      <datalist id=&quot;dlSub&quot;></datalist>
+      <datalist id=&quot;dlIdx&quot;></datalist>
+    </div>
+
+    <div class=&quot;card&quot;>
+      <h2><span class=&quot;n&quot;>3</span>Kernscore en indexscores</h2>
+      <table class=&quot;inp&quot; id=&quot;tIdx&quot;>
+        <thead><tr><th>Score</th><th>Som gs</th><th>Normscore</th><th>Percentiel</th><th>BI (90%)</th><th>Interpretatie</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class=&quot;row-actions&quot;><button class=&quot;btn small&quot; id=&quot;bAddIdx&quot;>＋ Indexscore toevoegen</button></div>
+      <p class=&quot;hint&quot;>Normscores: gem. 100, SD 15. Wordt de som van de kernscore leeg gelaten, dan rekent de app ze uit op basis van de subtests met ✓ bij 'Kern'.</p>
+    </div>
+
+    <div class=&quot;card&quot;>
+      <h2><span class=&quot;n&quot;>4</span>Observaties, conclusie en advies</h2>
+      <label class=&quot;f&quot;>Observaties tijdens de afname<textarea data-p=&quot;observaties&quot; rows=&quot;3&quot;></textarea></label>
+      <label class=&quot;f&quot; style=&quot;margin-top:10px&quot;>Conclusie
+        <textarea data-p=&quot;conclusie&quot; id=&quot;taConcl&quot; rows=&quot;6&quot;></textarea></label>
+      <div class=&quot;row-actions&quot;><button class=&quot;btn small&quot; id=&quot;bConcl&quot;>✎ Voorstel van de app overnemen</button></div>
+      <label class=&quot;f&quot; style=&quot;margin-top:10px&quot;>Advies<textarea data-p=&quot;advies&quot; rows=&quot;3&quot;></textarea></label>
+      <div class=&quot;opts&quot; style=&quot;margin-top:12px&quot;>
+        <label><input type=&quot;checkbox&quot; data-p=&quot;opties.grafiek&quot;> Profielgrafiek in rapport</label>
+        <label><input type=&quot;checkbox&quot; data-p=&quot;opties.analyse&quot;> Automatische analyse in rapport</label>
+        <label><input type=&quot;checkbox&quot; data-p=&quot;opties.controlepunten&quot;> Controlepunten in rapport</label>
+      </div>
+    </div>
+
+    <details class=&quot;help card&quot;>
+      <summary>Hoe werkt opslaan?</summary>
+      <ul>
+        <li><b>Opslaan</b> bewaart het volledige dossier als <code>.json</code>-bestand. Met <b>Openen</b> laad je het later terug in de app.</li>
+        <li>In <b>Chrome of Edge</b> kies je bij elke opslag zelf de map en de bestandsnaam. In Safari en Firefox komt het bestand in de map Downloads (in Safari kun je bij Instellingen › Algemeen 'Vraag waar te bewaren' instellen).</li>
+        <li><b>Open PDF</b> toont het rapport meteen in een nieuw tabblad (daar kun je ook afdrukken). <b>Open Word</b> maakt het Word-bestand aan; klik het aan in de downloadbalk om het in Word te openen. Tip in Chrome: kies bij de download 'Bestanden van dit type altijd openen', dan opent Word voortaan vanzelf.</li>
+        <li>Wil je het rapport of dossier in een map naar keuze bewaren, gebruik dan <b>Opslaan ▾</b> en kies Dossier, Word of PDF.</li>
+        <li><b>↶ Terug</b> en <b>↷ Vooruit</b> maken wijzigingen ongedaan of opnieuw (ook met Ctrl/⌘+Z en Ctrl/⌘+Shift+Z buiten een invulveld). <b>Alles wissen</b> maakt het dossier leeg; praktijk, onderzoeker en logo blijven bewaard.</li>
+        <li>Bij de eerste keer openen staat het voorbeeld al ingevuld.</li>
+        <li>Alle gegevens blijven op deze computer. Er wordt niets online verstuurd. De app bewaart ook automatisch een concept in deze browser.</li>
+        <li>De automatische analyse is een hulpmiddel. De klinische interpretatie blijft bij de logopedist.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section id=&quot;reportcol&quot;>
+    <div id=&quot;checks&quot;></div>
+    <div class=&quot;preview-head&quot;><b style=&quot;color:var(--brand)&quot;>Voorbeeld rapport</b><span>Zo ziet de Word/PDF-export eruit</span></div>
+    <div class=&quot;paper&quot; id=&quot;paper&quot;></div>
+  </section>
+</main>
+
+<div class=&quot;modal-bg&quot; id=&quot;modal&quot;><div class=&quot;modal&quot;><p id=&quot;modalMsg&quot;></p><div class=&quot;acts&quot;><button class=&quot;btn&quot; id=&quot;mNo&quot;>Annuleren</button><button class=&quot;btn primary&quot; id=&quot;mYes&quot;>Doorgaan</button></div></div></div>
+<div id=&quot;toast&quot;></div>
+
+<script src=&quot;https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js&quot;></script>
+<script src=&quot;https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js&quot;></script>
+<script>
+&quot;use strict&quot;;
+/* ============ Constanten ============ */
+const APP_ID = 'CELF5NL-analyse';
+const DEFAULT_ONDERZOEKER = 'Sophie Houben', DEFAULT_PRAKTIJK = 'Logopedie Sophie';
+const DEFAULT_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAGZCAMAAAAuInDfAAABUWlDQ1BJQ0MgUHJvZmlsZQAAeJx9kL9LAmEcxj+nhWA2RA0NDTdFwxWiQS0NahBFw2EFatN5/gS1l7uLENr6B4T+gwqa25IGGxsagqgpamtqKmgpeePuDI2oZ3k/PO/Dw5cHApOGELUhoN5wrPRKUs1kc2roGQUFT4Zpi4Sur7v8/f7U+72fvZ11u37//6twoWibwCcQNYXlgKIB+p4jXN4HJqxMNgdKy+Wyzycu530+9zKb6RQo14BqVowCKC+Alh/wywNcr+2avRvc6yPFxtaG2wNMsUwVG0ENgyYqOvE/8vNePsUOgiYWVcpUcFBJILyGIiqrNDCZQ0MlRpQYMXfn3n53vf20vnfwBEsdKeVF31vrwNkChNt9b2YRxkbgqi0My/CsIBAoleD1FEazMH4D4W27FI/510eSMPwo5ds0hA6h25Ly40jK7jEEH+Cy8QUDp2ITOrol5gAAAMBQTFRF///////u7v//7/P05e/24ebp1ODq58uy6cmu5smw09PSw9Db6civ4siz4seyy7yptMLOrLrGrbGynK69qpl8p4tglKW1j5mhgZWoe5CkeY2hdIykb42qcIylbIyrbIynb4upbYuob4uka4upqIlgqIlcpolepopboolhdYmfcomicYmjcImkbYqqboqobomqboqna4qqb4mlb4mhbImkfoePb4egd32BaX6SWmNoS1FSRUVAOEJDOjw2NDw8Nzg03G5uDAAAfS5JREFUeNrtnQdD29i2hTO4kECGUIKbJCzZCcGSMLIkREv5///qrbX3kQsYsGwnZN49Z+6dTBLAtvRp9/LunT322GOPPfbYY4899thjjz322GOPPfbYY4899thjjz322GOPPX/LaeyZ07DXwp4/Tl9j77jdvr65ubluH1sE7fmdqDX2GrVHf9g8vr65uzfn7vrYEmjPtk8N4O0dHh1D0LXbx8eHc2Kucdi+uf/+k+f7z1+/Hu5v/uME1viUzR/8vmYReGMLD+jd3N2Vcu6mfVhCVt+/vrv/LgcI/vr148f99d5/Gb89mBO0Jm74ee9u1K44tIbFm96Uw2uy90DGfv36+ePHwwyyPci/+zthUxD88evH3X9VBELwHYE+fJaHhx/mPDw84PPdqNi3gvCNbszxHdhSGUcx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';
+const TEST_REF = 'Clinical Evaluation of Language Fundamentals (CELF) – 5 – NL (E.H. Wiig, E. Semel &amp; W.A. Secord, Nederlandstalige bewerking: J. de Jong), 2019';
+const SUBTESTS = [
+  {code:'ZB', naam:'Zinnen Begrijpen', domein:'R'},
+  {code:'WS', naam:'Woordstructuur', domein:'E'},
+  {code:'ZF', naam:'Zinnen Formuleren', domein:'E'},
+  {code:'ZH', naam:'Zinnen Herhalen', domein:'E'},
+  {code:'WK', naam:'Woordklassen', domein:'R'},
+  {code:'CAV', naam:'Concepten en Aanwijzingen Volgen', domein:'R'},
+  {code:'WD', naam:'Woorddefinities', domein:'E'},
+  {code:'SR', naam:'Semantische Relaties', domein:'R'},
+  {code:'ZS', naam:'Zinnen Samenvoegen', domein:'E'},
+  {code:'BGT', naam:'Begrijpen van Gesproken Tekst', domein:'R'}
+];
+const INDEXES = ['Receptieve Taalindex','Expressieve Taalindex','Taalinhoudindex','Taalstructuurindex','Taalgeheugenindex'];
+const DOMEIN = {R:'Receptief', E:'Expressief', RE:'Rec. + Expr.'};
+const PCT_SS = {1:0.1,2:0.4,3:1,4:2,5:5,6:9,7:16,8:25,9:37,10:50,11:63,12:75,13:84,14:91,15:95,16:98,17:99,18:99.6,19:99.9};
+const LABELS = {
+  boven:{t:'boven gemiddeld', cls:'boven'},
+  gem:{t:'gemiddeld', cls:'gem'},
+  grens:{t:'grensgebied', cls:'grens'},
+  zwak:{t:'zwak', cls:'zwak'},
+  ernstig:{t:'ernstig zwak', cls:'ernstig'}
+};
+
+function defaults(){
+  const inst = loadSettings();
+  return {
+    kind:{naam:'',voornaam:'',geboortedatum:'',testdatum:todayISO(),normgroep:'Vlaanderen',school:'',klas:'',thuistaal:'',onderzoeker:inst.onderzoeker||DEFAULT_ONDERZOEKER,praktijk:inst.praktijk||DEFAULT_PRAKTIJK},
+    reden:'',
+    subtests:['ZB','WS','ZF','ZH'].map(c=>{const s=SUBTESTS.find(x=>x.code===c);return {naam:s.naam,code:s.code,domein:s.domein,ruw:'',gs:'',pc:'',le:'',kern:true};}),
+    kern:{som:'',ns:'',pc:'',bi:''},
+    indexen:[],
+    observaties:'',conclusie:'',advies:'',
+    opties:{grafiek:true,analyse:true,controlepunten:false},
+    logo:inst.logoUit?(inst.logo||''):(inst.logo||DEFAULT_LOGO)
+  };
+}
+const VOORBEELD = {
+  kind:{naam:'Janssens',voornaam:'Lotte',geboortedatum:'2017-04-10',testdatum:'2026-11-18',normgroep:'Vlaanderen',school:'Basisschool (voorbeeld)',klas:'4de leerjaar',thuistaal:'Nederlands',onderzoeker:'',praktijk:''},
+  subtests:[
+    {naam:'Zinnen Begrijpen',code:'ZB',domein:'R',ruw:'20',gs:'8',pc:'25',le:'8;4',kern:true},
+    {naam:'Woordstructuur',code:'WS',domein:'E',ruw:'15',gs:'4',pc:'2',le:'6;4',kern:true},
+    {naam:'Zinnen Formuleren',code:'ZF',domein:'E',ruw:'26',gs:'3',pc:'1',le:'4;6',kern:true},
+    {naam:'Zinnen Herhalen',code:'ZH',domein:'E',ruw:'4',gs:'6',pc:'9',le:'7;9',kern:true}
+  ],
+  kern:{som:'21',ns:'74',pc:'4',bi:''},
+  reden:'Aanmelding op vraag van de school wegens moeilijkheden met de mondelinge expressie: het kind spreekt in korte, soms onvolledige zinnen en maakt fouten in vervoegingen en meervoudsvormen. Het taalbegrip in de klas lijkt beter. Vraag naar een objectief beeld van de taalvaardigheden.',
+  observaties:'Het kind werkte gemotiveerd en geconcentreerd mee. De afname verliep in één sessie, zonder opvallende vermoeidheid. Bij Zinnen Formuleren produceerde het kind vaak korte of onvolledige zinnen, met weglating van functiewoorden en fouten in de werkwoordsvervoeging. Bij Zinnen Herhalen werden langere zinnen ingekort of vereenvoudigd. Opdrachten werden doorgaans goed begrepen; bij complexere zinsconstructies vroeg het kind af en toe om herhaling.',
+  advies:'Opstart van logopedische therapie gericht op de morfosyntaxis (werkwoordsvervoeging, meervoudsvorming, zinsbouw) en de expressieve taal.\nAanvullend onderzoek: de kernsubtests voor 9 jaar en ouder (o.a. Woordklassen en Semantische Relaties), een spontane taalanalyse en, indien nog niet gebeurd, een audiologisch onderzoek. Een intelligentieonderzoek is nodig indien vereist voor een RIZIV-aanvraag.\nOverleg met de school over ondersteuning bij mondelinge opdrachten (bv. extra denktijd, visuele ondersteuning).\nEvaluatie na zes maanden therapie.'
+};
+
+/* ============ Hulpfuncties ============ */
+const $ = s=>document.querySelector(s);
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function esc(s){return String(s??'').replace(/[&amp;<>&quot;']/g,c=>({'&amp;':'&amp;amp;','<':'&amp;lt;','>':'&amp;gt;','&quot;':'&amp;quot;',&quot;'&quot;:'&amp;#39;'}[c]));}
+function num(v){if(v===null||v===undefined)return null;const s=String(v).trim().replace(',','.');if(s==='')return null;const n=Number(s);return isFinite(n)?n:null;}
+function nl(n,d=2){return (n<0?'−':'')+Math.abs(n).toFixed(d).replace('.',',');}
+function fmtPc(p){if(p===null)return '';if(p<1)return '<1';if(p>99)return '>99';return (Math.round(p*10)/10).toString().replace('.',',');}
+function fmtDate(iso){if(!iso)return '';const [y,m,d]=iso.split('-');return d+'/'+m+'/'+y;}
+function normCdf(z){const t=1/(1+0.2316419*Math.abs(z));const d=0.3989423*Math.exp(-z*z/2);let p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p;}
+function labelZ(z){if(z===null)return null;if(z>=1)return 'boven';if(z>=-1)return 'gem';if(z>-1.5)return 'grens';if(z>-2)return 'zwak';return 'ernstig';}
+function parseLE(s){if(!s)return null;const m=String(s).trim().match(/^(\d{1,2})\s*[;:.,]\s*(\d{1,2})$/)||String(s).trim().match(/^(\d{1,2})$/);if(!m)return undefined;const j=+m[1],mm=m[2]!==undefined?+m[2]:0;if(mm>11)return undefined;return j*12+mm;}
+function fmtJM(months){const a=Math.abs(months);return Math.floor(a/12)+';'+(a%12);}
+function lijst(arr){if(arr.length<=1)return arr.join('');return arr.slice(0,-1).join(', ')+' en '+arr[arr.length-1];}
+function getP(o,p){return p.split('.').reduce((a,k)=>a==null?a:a[k],o);}
+function setP(o,p,v){const ks=p.split('.');let a=o;for(let i=0;i<ks.length-1;i++){a=a[ks[i]];}a[ks[ks.length-1]]=v;}
+function volNaam(){return [S.kind.naam,S.kind.voornaam].map(v=>(v||'').trim()).filter(Boolean).join(' ');}
+function fileBase(){const clean=v=>(v||'').trim().replace(/[^\p{L}\p{N}\- ]+/gu,'').replace(/\s+/g,'-');const parts=[clean(S.kind.naam),clean(S.kind.voornaam)].filter(Boolean);return (parts.length?parts.join('_'):'dossier')+'_CELF5NL'+(S.kind.testdatum?'_'+S.kind.testdatum:'');}
+
+function leeftijd(gb,td){
+  if(!gb||!td)return null;const b=new Date(gb+'T12:00:00'),t=new Date(td+'T12:00:00');if(isNaN(b)||isNaN(t)||t<b)return null;
+  let j=t.getFullYear()-b.getFullYear(),m=t.getMonth()-b.getMonth(),d=t.getDate()-b.getDate();
+  if(d<0){m--;d+=new Date(t.getFullYear(),t.getMonth(),0).getDate();}
+  if(m<0){j--;m+=12;}
+  return {j,m,d,maanden:j*12+m};
+}
+
+/* ============ Status ============ */
+let S = defaults();
+
+/* ============ Analyse ============ */
+function analyse(S){
+  const A={warnings:[],errors:[],bevindingen:[],rows:[],idx:[],kern:null};
+  const lt=leeftijd(S.kind.geboortedatum,S.kind.testdatum);A.lt=lt;
+  if(!lt)A.warnings.push('Vul geboortedatum en testdatum in (testdatum na geboortedatum).');
+  else if(lt.maanden<60||lt.maanden>=228)A.warnings.push('Leeftijd '+lt.j+';'+lt.m+' valt mogelijk buiten het normbereik van de CELF-5-NL. Controleer de handleiding.');
+
+  S.subtests.forEach((s,i)=>{
+    const gs=num(s.gs),ruw=num(s.ruw),pcIn=num(s.pc);const r={s,i,gs,ruw,pcIn,z:null,lab:null,pc:null,pcApprox:false,le:null,leDiff:null};
+    const nm=s.naam||('Subtest '+(i+1));
+    if(gs!==null){
+      if(gs<1||gs>19||!Number.isInteger(gs)){A.errors.push(nm+': geschaalde score moet een geheel getal tussen 1 en 19 zijn.');}
+      else{
+        r.z=(gs-10)/3;r.lab=labelZ(r.z);
+        const exp=PCT_SS[gs];
+        if(pcIn===null){r.pc=exp;r.pcApprox=true;}
+        else{r.pc=pcIn;const tol=Math.max(3,exp*0.35);if(Math.abs(pcIn-exp)>tol)A.warnings.push(nm+': percentiel '+fmtPc(pcIn)+' past niet goed bij geschaalde score '+gs+' (verwacht ongeveer '+fmtPc(exp)+'). Controleer.');}
+      }
+    }
+    if(s.le){const le=parseLE(s.le);if(le===undefined)A.warnings.push(nm+': leeftijdsequivalent &quot;'+s.le+'&quot; niet herkend. Gebruik de notatie j;m (bv. 8;4).');else{r.le=le;if(lt)r.leDiff=le-lt.maanden;}}
+    A.rows.push(r);
+  });
+
+  // kernscore
+  const kernRows=A.rows.filter(r=>r.s.kern&amp;&amp;r.gs!==null&amp;&amp;r.z!==null);
+  const somCalc=kernRows.reduce((a,r)=>a+r.gs,0);
+  const somIn=num(S.kern.som), ns=num(S.kern.ns), pcIn=num(S.kern.pc);
+  const K={somIn,somCalc,som:somIn!==null?somIn:(kernRows.length?somCalc:null),ns,pcIn,pc:null,pcApprox:false,z:null,lab:null,bi:S.kern.bi};
+  if(somIn!==null&amp;&amp;kernRows.length&amp;&amp;somIn!==somCalc)A.warnings.push('Totaal geschaalde score kernscore ('+somIn+') verschilt van de som van de aangevinkte subtests ('+somCalc+').');
+  const nKern=A.rows.filter(r=>r.s.kern).length;
+  if(nKern&amp;&amp;nKern!==4)A.warnings.push('Er zijn '+nKern+' subtests aangevinkt voor de kernscore. De kernscore bestaat normaal uit 4 subtests.');
+  if(ns!==null){
+    if(ns<40||ns>160)A.errors.push('Normscore kernscore ('+ns+') lijkt onwaarschijnlijk.');
+    K.z=(ns-100)/15;K.lab=labelZ(K.z);const exp=normCdf(K.z)*100;
+    if(pcIn===null){K.pc=exp;K.pcApprox=true;}else{K.pc=pcIn;if(Math.abs(pcIn-exp)>Math.max(2,exp*0.3))A.warnings.push('Percentiel kernscore ('+fmtPc(pcIn)+') past niet goed bij normscore '+ns+' (verwacht ongeveer '+fmtPc(exp)+').');}
+  }
+  A.kern=K;
+
+  if(lt){
+    const codes=A.rows.filter(r=>r.s.kern).map(r=>r.s.code);
+    if(lt.maanden>=108&amp;&amp;codes.some(c=>c==='ZB'||c==='WS'))A.warnings.push('Het kind is '+lt.j+';'+lt.m+'. Vanaf 9 jaar gebruikt de CELF-5 een andere set kernsubtests (o.a. Woordklassen en Semantische Relaties). Controleer in de handleiding of Zinnen Begrijpen en Woordstructuur bij deze leeftijd in de kernscore horen en voor deze leeftijd genormeerd zijn.');
+    if(lt.maanden<108&amp;&amp;codes.some(c=>c==='WK'||c==='SR'))A.warnings.push('Het kind is jonger dan 9 jaar. Controleer of Woordklassen en Semantische Relaties bij deze leeftijd in de kernscore horen.');
+  }
+  // ZH ruwe score heel laag t.o.v. gs
+  A.rows.forEach(r=>{if(r.s.code==='ZH'&amp;&amp;r.ruw!==null&amp;&amp;r.gs!==null&amp;&amp;r.ruw<10&amp;&amp;r.gs>=5&amp;&amp;lt&amp;&amp;lt.maanden>=96)A.warnings.push('Zinnen Herhalen: ruwe score '+r.ruw+' lijkt erg laag voor geschaalde score '+r.gs+' op deze leeftijd. Mogelijk een tikfout; controleer het scoreformulier.');});
+
+  // indexen
+  S.indexen.forEach((x,i)=>{const ns=num(x.ns),pcIn=num(x.pc);const r={x,i,ns,pcIn,z:null,lab:null,pc:null,pcApprox:false};
+    if(ns!==null){r.z=(ns-100)/15;r.lab=labelZ(r.z);const exp=normCdf(r.z)*100;if(pcIn===null){r.pc=exp;r.pcApprox=true;}else{r.pc=pcIn;if(Math.abs(pcIn-exp)>Math.max(2,exp*0.3))A.warnings.push((x.naam||'Index')+': percentiel '+fmtPc(pcIn)+' past niet goed bij normscore '+ns+'.');}}
+    A.idx.push(r);});
+
+  // ---- bevindingen ----
+  const val=A.rows.filter(r=>r.z!==null);
+  const B=A.bevindingen;
+  if(K.ns!==null){
+    B.push('De kernscore bedraagt '+K.ns+' (percentiel '+(K.pcApprox?'≈ ':'')+fmtPc(K.pc)+'; '+nl(K.z)+' SD)'+(K.bi?' met betrouwbaarheidsinterval '+K.bi:'')+'. Dit is '+LABELS[K.lab].t+'.');
+  }
+  A.idx.filter(r=>r.z!==null).forEach(r=>B.push((r.x.naam||'Index')+': normscore '+r.ns+' (percentiel '+(r.pcApprox?'≈ ':'')+fmtPc(r.pc)+'; '+nl(r.z)+' SD), '+LABELS[r.lab].t+'.'));
+  if(val.length){
+    const groups=['boven','gem','grens','zwak','ernstig'].map(k=>[k,val.filter(r=>r.lab===k)]).filter(g=>g[1].length);
+    groups.forEach(([k,rs])=>B.push(cap(LABELS[k].t)+': '+lijst(rs.map(r=>r.s.naam+' (gs '+r.gs+'; '+nl(r.z)+' SD)'))+'.'));
+    const R=val.filter(r=>r.s.domein==='R'),E=val.filter(r=>r.s.domein==='E');
+    const mean=a=>a.reduce((x,r)=>x+r.gs,0)/a.length;
+    A.mR=R.length?mean(R):null;A.mE=E.length?mean(E):null;
+    if(R.length&amp;&amp;E.length){
+      const d=A.mR-A.mE;
+      if(Math.abs(d)>=3)B.push('Receptieve subtests (gemiddeld gs '+nl(A.mR,1)+') scoren '+(d>0?'duidelijk hoger':'duidelijk lager')+' dan expressieve subtests (gemiddeld gs '+nl(A.mE,1)+'). Het verschil is '+nl(Math.abs(d),1)+' punten. Dit wijst op een overwegend '+(d>0?'expressief':'receptief')+' taalprobleem.');
+      else B.push('Er is geen duidelijk verschil tussen receptieve (gemiddeld gs '+nl(A.mR,1)+') en expressieve subtests (gemiddeld gs '+nl(A.mE,1)+').');
+    }
+    if(val.length>=2){
+      const mx=val.reduce((a,r)=>r.gs>a.gs?r:a),mn=val.reduce((a,r)=>r.gs<a.gs?r:a);
+      if(mx.gs-mn.gs>=3)B.push('Het grootste verschil tussen subtests is '+(mx.gs-mn.gs)+' punten: '+mx.s.naam+' (gs '+mx.gs+') tegenover '+mn.s.naam+' (gs '+mn.gs+'). Toets dit aan de kritische verschilwaarden in de handleiding.');
+      if(val.length>=3){const m=mean(val);const st=val.filter(r=>r.gs-m>=3),zw=val.filter(r=>m-r.gs>=3);
+        if(st.length||zw.length)B.push('Ten opzichte van het eigen gemiddelde (gs '+nl(m,1)+')'+(st.length?' is '+lijst(st.map(r=>r.s.naam))+' een relatieve sterkte':'')+(st.length&amp;&amp;zw.length?' en':'')+(zw.length?' '+(zw.length>1?'zijn ':'is ')+lijst(zw.map(r=>r.s.naam))+' een relatieve zwakte':'')+'.');}
+    }
+    const n2=val.filter(r=>r.z<=-2),n15=val.filter(r=>r.z<=-1.5);
+    B.push('Aantal subtests op of onder −2 SD: '+n2.length+(n2.length?' ('+n2.map(r=>r.s.code||r.s.naam).join(', ')+')':'')+'. Op of onder −1,5 SD: '+n15.length+(n15.length?' ('+n15.map(r=>r.s.code||r.s.naam).join(', ')+')':'')+'.');
+    // domeinspecifiek
+    const zwak=r=>r.z!==null&amp;&amp;r.z<=-1.5;
+    const ms=val.filter(r=>['WS','ZF','ZS'].includes(r.s.code)&amp;&amp;zwak(r));
+    if(ms.length)B.push('Zwakke scores op '+lijst(ms.map(r=>r.s.naam))+' wijzen op moeilijkheden met de morfosyntaxis (woordvormen en zinsbouw).');
+    const zh=val.find(r=>r.s.code==='ZH');
+    if(zh&amp;&amp;zh.z<-1)B.push('Zinnen Herhalen steunt op het verbale werkgeheugen en de morfosyntactische kennis en geldt als sterke klinische marker voor een taalontwikkelingsstoornis. De zwakke score hier versterkt het beeld.');
+    const sem=val.filter(r=>['WK','WD','SR'].includes(r.s.code)&amp;&amp;zwak(r));
+    if(sem.length)B.push('Zwakke scores op '+lijst(sem.map(r=>r.s.naam))+' wijzen op moeilijkheden met de woordenschat en semantiek.');
+    const beg=val.filter(r=>['ZB','CAV','BGT'].includes(r.s.code)&amp;&amp;zwak(r));
+    if(beg.length)B.push('Zwakke scores op '+lijst(beg.map(r=>r.s.naam))+' wijzen op moeilijkheden met het taalbegrip.');
+    // LE
+    const leR=A.rows.filter(r=>r.leDiff!==null&amp;&amp;r.leDiff<0);
+    if(leR.length&amp;&amp;lt)B.push('Leeftijdsequivalenten onder de kalenderleeftijd ('+lt.j+';'+lt.m+'): '+leR.map(r=>r.s.naam+' '+fmtJM(r.le)+' (−'+fmtJM(-r.leDiff)+')').join('; ')+'. Gebruik leeftijdsequivalenten alleen ter illustratie, niet voor de diagnose.');
+    if(n2.length||(K.z!==null&amp;&amp;K.z<=-1.5))A.warnings.push('Toets de resultaten aan de geldende RIZIV-criteria voor de aanvraag (o.a. vereiste SD-grens, aantal domeinen, intelligentie en uitsluitingscriteria).');
+  }
+  if(S.kind.normgroep!=='Vlaanderen'&amp;&amp;S.kind.normgroep)A.warnings.push('Normgroep staat op '+S.kind.normgroep+'. Voor een Vlaams kind zijn de Vlaamse normen aangewezen.');
+  A.voorstel=conclusieVoorstel(S,A);
+  return A;
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function conclusieVoorstel(S,A){
+  const naam=(S.kind.voornaam||'').trim()||'Het kind';
+  const val=A.rows.filter(r=>r.z!==null);const K=A.kern;const p=[];
+  if(K.ns!==null){
+    const zin={boven:'wat boven het gemiddelde ligt',gem:'wat binnen het gemiddelde ligt',grens:'wat in het grensgebied (licht onder het gemiddelde) ligt',zwak:'wat onder het gemiddelde ligt',ernstig:'wat ruim onder het gemiddelde ligt'}[K.lab];
+    p.push(naam+' behaalt op de CELF-5-NL een kernscore van '+K.ns+' (pc '+fmtPc(K.pc)+'), '+zin+'.');
+  } else if(val.length) p.push(naam+' werd onderzocht met de CELF-5-NL.');
+  if(!val.length)return p.join(' ');
+  const R=val.filter(r=>r.s.domein==='R'),E=val.filter(r=>r.s.domein==='E');
+  const desc=a=>a.map(r=>r.s.naam+': gs '+r.gs);
+  const allOk=a=>a.every(r=>r.z>=-1);
+  const anyWeak=val.some(r=>r.z<-1);
+  let typ='';
+  if(R.length&amp;&amp;E.length&amp;&amp;A.mR-A.mE>=3){
+    p.push('Het profiel toont een duidelijke discrepantie tussen '+(allOk(R)?'een leeftijdsadequaat':'een relatief beter')+' taalbegrip ('+lijst(desc(R))+') en '+rangeLab(E)+' expressieve vaardigheden ('+lijst(desc(E))+').');
+    typ='expressief';
+  } else if(R.length&amp;&amp;E.length&amp;&amp;A.mE-A.mR>=3){
+    p.push('Het profiel toont een duidelijke discrepantie tussen '+(allOk(E)?'leeftijdsadequate':'relatief betere')+' expressieve vaardigheden ('+lijst(desc(E))+') en '+(allOk(R)?'het':'een '+rangeLab(R))+' taalbegrip ('+lijst(desc(R))+').');
+    typ='receptief';
+  } else if(!anyWeak){
+    p.push('Alle afgenomen subtests liggen binnen het gemiddelde of hoger. Op basis van deze afname zijn er geen aanwijzingen voor een taalprobleem.');
+  } else {
+    const zw=val.filter(r=>r.z<-1);
+    p.push('Zwakke resultaten worden gezien op '+lijst(zw.map(r=>r.s.naam+' (gs '+r.gs+')'))+'.');
+    if(R.some(r=>r.z<-1)&amp;&amp;E.some(r=>r.z<-1))typ='gemengd';
+  }
+  const extra=[];
+  if(val.some(r=>['WS','ZF','ZS'].includes(r.s.code)&amp;&amp;r.z<=-1.5))extra.push('vooral morfosyntactische moeilijkheden');
+  if(val.some(r=>['WK','WD','SR'].includes(r.s.code)&amp;&amp;r.z<=-1.5))extra.push('semantische moeilijkheden');
+  const zh=val.find(r=>r.s.code==='ZH'&amp;&amp;r.z<-1);if(zh)extra.push('een zwak verbaal werkgeheugen');
+  if(typ==='expressief')p.push('Dit wijst op een expressief taalprobleem'+(extra.length?' met '+lijst(extra):'')+'.');
+  else if(typ==='receptief')p.push('Dit wijst op een overwegend receptief taalprobleem'+(extra.length?', met daarnaast '+lijst(extra):'')+'.');
+  else if(typ==='gemengd')p.push('Zowel receptieve als expressieve vaardigheden zijn zwak, wat wijst op een gemengd taalprobleem'+(extra.length?' met '+lijst(extra):'')+'.');
+  else if(anyWeak&amp;&amp;extra.length)p.push('Dit wijst op '+lijst(extra)+'.');
+  if(anyWeak)p.push('Verder onderzoek (bv. aanvullende subtests of een spontane taalanalyse) en het uitsluiten van andere verklaringen zijn aangewezen om een eventuele taalontwikkelingsstoornis te bevestigen.');
+  return p.join(' ');
+}
+function rangeLab(a){const ls=[...new Set(a.map(r=>r.lab))];const order=['boven','gem','grens','zwak','ernstig'];ls.sort((x,y)=>order.indexOf(x)-order.indexOf(y));
+  if(ls.length===1)return ({boven:'bovengemiddelde',gem:'gemiddelde',grens:'licht zwakke',zwak:'zwakke',ernstig:'ernstig zwakke'})[ls[0]];
+  const adj={boven:'bovengemiddelde',gem:'gemiddelde',grens:'licht zwakke',zwak:'zwakke',ernstig:'ernstig zwakke'};
+  const base={boven:'bovengemiddeld',gem:'gemiddeld',grens:'licht zwak',zwak:'zwak',ernstig:'ernstig zwak'};
+  return base[ls[0]]+' tot '+adj[ls[ls.length-1]];}
+
+/* ============ Rapportmodel ============ */
+function buildReport(S,A){
+  const b=[];const k=S.kind;const lt=A.lt;
+  b.push({t:'top'});
+  b.push({t:'title',text:'Taalonderzoek – CELF-5-NL'});
+  b.push({t:'sub',text:TEST_REF});
+  const kv=[['Naam',k.naam||'—'],['Voornaam',k.voornaam||'—'],['Geboortedatum',fmtDate(k.geboortedatum)||'—'],['Testdatum',fmtDate(k.testdatum)||'—'],
+    ['Leeftijd bij afname',lt?lt.j+' jaar '+lt.m+' maanden ('+lt.j+';'+lt.m+')':'—']];
+  if(k.school||k.klas)kv.push(['School / klas',[k.school,k.klas].filter(Boolean).join(' – ')]);
+  if(k.thuistaal)kv.push(['Thuistaal',k.thuistaal]);
+  kv.push(['Normgroep',k.normgroep||'—']);
+  if(k.onderzoeker)kv.push(['Onderzoeker',k.onderzoeker]);
+  b.push({t:'h',text:'Gegevens'});b.push({t:'kv',rows:kv});
+  if(S.reden.trim()){b.push({t:'h',text:'Reden van aanmelding'});b.push({t:'p',text:S.reden.trim()});}
+
+  b.push({t:'h',text:'Subtestscores'});
+  const rows=A.rows.filter(r=>r.s.naam||r.gs!==null).map(r=>[
+    (r.s.naam||'—')+(r.s.code?' '+r.s.code:''), r.s.ruw||'', r.gs===null?'':String(r.gs),
+    r.pc===null?'':(r.pcApprox?'≈ ':'')+fmtPc(r.pc), r.s.le||'', r.lab?LABELS[r.lab].t:'' ]);
+  b.push({t:'table',cols:[{h:'Subtest',w:29,l:1},{h:'Ruwe\nscore',w:11},{h:'Geschaalde\nscore',w:13},{h:'Percentiel',w:13},{h:'Leeftijds-\nequivalent',w:16},{h:'Interpretatie',w:18}],rows,labCol:5,labs:A.rows.filter(r=>r.s.naam||r.gs!==null).map(r=>r.lab)});
+
+  const K=A.kern;const irows=[],ilabs=[];
+  if(K.som!==null||K.ns!==null){irows.push(['Kernscore',K.som===null?'':String(K.som),K.ns===null?'':String(K.ns),K.pc===null?'':(K.pcApprox?'≈ ':'')+fmtPc(K.pc),K.bi||'',K.lab?LABELS[K.lab].t:'']);ilabs.push(K.lab);}
+  A.idx.forEach(r=>{if(!r.x.naam&amp;&amp;r.ns===null)return;irows.push([r.x.naam||'Index',r.x.som||'',r.ns===null?'':String(r.ns),r.pc===null?'':(r.pcApprox?'≈ ':'')+fmtPc(r.pc),r.x.bi||'',r.lab?LABELS[r.lab].t:'']);ilabs.push(r.lab);});
+  if(irows.length){b.push({t:'h',text:'Kernscore en indexscores'});
+    b.push({t:'table',cols:[{h:'Score',w:29,l:1},{h:'Som\ngesch. scores',w:13},{h:'Normscore',w:12},{h:'Percentiel',w:13},{h:'BI (90%)',w:15},{h:'Interpretatie',w:18}],rows:irows,labCol:5,labs:ilabs});}
+
+  if(S.opties.grafiek&amp;&amp;A.rows.some(r=>r.z!==null)){b.push({t:'h',text:'Profiel geschaalde scores'});b.push({t:'chart'});
+    b.push({t:'legend',text:'Groene zone = gemiddeld (gs 7–13, binnen 1 SD). Geschaalde scores: gemiddelde 10, SD 3. Normscores: gemiddelde 100, SD 15. Classificatie: gemiddeld ≥ −1 SD; grensgebied −1 tot −1,5 SD; zwak −1,5 tot −2 SD; ernstig zwak ≤ −2 SD.'});}
+  if(S.opties.analyse&amp;&amp;A.bevindingen.length){b.push({t:'h',text:'Analyse'});b.push({t:'bullets',items:A.bevindingen});}
+  if(S.observaties.trim()){b.push({t:'h',text:'Observaties tijdens de afname'});b.push({t:'p',text:S.observaties.trim()});}
+  b.push({t:'h',text:'Conclusie'});b.push({t:'p',text:S.conclusie.trim()||A.voorstel||'',empty:!S.conclusie.trim()});
+  if(S.advies.trim()){b.push({t:'h',text:'Advies'});b.push({t:'p',text:S.advies.trim()});}
+  if(S.opties.controlepunten&amp;&amp;(A.warnings.length||A.errors.length)){b.push({t:'h',text:'Controlepunten'});b.push({t:'bullets',items:[...A.errors,...A.warnings],box:1});}
+  const sig=[k.onderzoeker,k.praktijk].filter(Boolean).join(' – ');
+  if(sig)b.push({t:'sign',text:sig+(k.testdatum?', '+fmtDate(k.testdatum):'')});
+  return b;
+}
+
+/* ============ Grafiek (canvas) ============ */
+function drawChart(A,scale=2){
+  const rs=A.rows.filter(r=>r.z!==null);
+  const W=900,rowH=40,top=46,bottom=40,left=250,right=30;const H=top+rowH*rs.length+bottom;
+  const c=document.createElement('canvas');c.width=W*scale;c.height=H*scale;const g=c.getContext('2d');g.scale(scale,scale);
+  g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  const x=v=>left+(v-0.5)*(W-left-right)/19;
+  const zone=v=>v<=4?'#fbe0de':v===5?'#fde8d3':v===6?'#fbf3cf':v<=13?'#e4f2e8':'#e1ecf8';
+  for(let v=1;v<=19;v++){g.fillStyle=zone(v);g.fillRect(x(v-0.5),top-6,x(v+0.5)-x(v-0.5),rowH*rs.length+12);}
+  g.strokeStyle='#ffffff';g.lineWidth=1;for(let v=1;v<=19;v++){g.beginPath();g.moveTo(x(v-0.5),top-6);g.lineTo(x(v-0.5),top+rowH*rs.length+6);g.stroke();}
+  g.strokeStyle='#6b8cb5';g.setLineDash([4,4]);g.beginPath();g.moveTo(x(10),top-10);g.lineTo(x(10),top+rowH*rs.length+10);g.stroke();g.setLineDash([]);
+  g.font='600 13px Arial';g.fillStyle='#555';g.textAlign='center';g.textBaseline='middle';
+  for(let v=1;v<=19;v++)g.fillText(String(v),x(v),top-22);
+  g.font='12px Arial';g.fillStyle='#777';
+  [[1,'−3 SD'],[4,'−2 SD'],[7,'−1 SD'],[10,'gem.'],[13,'+1 SD'],[16,'+2 SD'],[19,'+3 SD']].forEach(([v,t])=>g.fillText(t,x(v),top+rowH*rs.length+24));
+  const pts=rs.map((r,i)=>({x:x(r.gs),y:top+rowH*i+rowH/2,r}));
+  g.strokeStyle='#3f5f86';g.lineWidth=2;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.stroke();
+  const col={boven:'#1d5fa8',gem:'#2e7d4f',grens:'#8a6d00',zwak:'#b45a06',ernstig:'#b3261e'};
+  pts.forEach(p=>{
+    g.textAlign='right';g.font='600 14px Arial';g.fillStyle='#222';g.fillText(trunc(g,p.r.s.naam+(p.r.s.code?' ('+p.r.s.code+')':''),left-16),left-14,p.y);
+    g.beginPath();g.arc(p.x,p.y,9,0,Math.PI*2);g.fillStyle=col[p.r.lab];g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke();
+    g.fillStyle='#fff';g.font='bold 10px Arial';g.textAlign='center';g.fillText(String(p.r.gs),p.x,p.y+0.5);
+  });
+  return c;
+}
+function trunc(g,t,w){if(g.measureText(t).width<=w)return t;while(t.length>3&amp;&amp;g.measureText(t+'…').width>w)t=t.slice(0,-1);return t+'…';}
+
+/* ============ HTML-weergave ============ */
+function renderHTML(blocks,A){
+  const el=$('#paper');el.innerHTML='';
+  blocks.forEach(b=>{
+    let n;
+    switch(b.t){
+      case 'top':{n=document.createElement('div');n.className='r-top';
+        const right=(S.logo||S.kind.praktijk)?'<div class=&quot;r-praktijk&quot;>'+(S.logo?'<img src=&quot;'+S.logo+'&quot; alt=&quot;&quot;>':'')+(S.logo?'':esc(S.kind.praktijk||''))+'</div>':'';
+        n.innerHTML=right;break;}
+      case 'title':n=document.createElement('div');n.className='r-title';n.textContent=b.text;break;
+      case 'sub':n=document.createElement('div');n.className='r-sub';n.textContent=b.text;break;
+      case 'h':n=document.createElement('h3');n.textContent=b.text;break;
+      case 'p':n=document.createElement('p');n.style.whiteSpace='pre-wrap';if(b.empty&amp;&amp;!b.text){n.className='empty';n.textContent='(nog geen conclusie)';}else n.textContent=b.text;break;
+      case 'legend':n=document.createElement('p');n.className='r-legend';n.textContent=b.text;break;
+      case 'sign':n=document.createElement('p');n.style.marginTop='18px';n.innerHTML='<i>'+esc(b.text)+'</i>';break;
+      case 'bullets':n=document.createElement('ul');if(b.box)n.className='r-checks';b.items.forEach(t=>{const li=document.createElement('li');li.textContent=t;n.appendChild(li);});break;
+      case 'kv':n=document.createElement('table');n.className='kv';n.innerHTML=b.rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>').join('');break;
+      case 'table':n=document.createElement('table');
+        n.innerHTML='<tr>'+b.cols.map(c=>'<th class=&quot;'+(c.l?'l':'')+'&quot; style=&quot;width:'+c.w+'%&quot;>'+esc(c.h)+'</th>').join('')+'</tr>'+
+          (b.rows.length?b.rows.map((r,ri)=>'<tr>'+r.map((v,ci)=>{if(ci===b.labCol&amp;&amp;b.labs[ri])return '<td><span class=&quot;chip '+LABELS[b.labs[ri]].cls+'&quot;>'+esc(v)+'</span></td>';return '<td class=&quot;'+(b.cols[ci].l?'l':'')+'&quot;'+(ci===0?' style=&quot;font-weight:600&quot;':'')+'>'+esc(v)+'</td>';}).join('')+'</tr>').join(''):'<tr><td colspan=&quot;'+b.cols.length+'&quot; class=&quot;empty&quot;>Nog geen scores ingevuld</td></tr>');break;
+      case 'chart':n=drawChart(A);break;
+    }
+    if(n)el.appendChild(n);
+  });
+}
+
+/* ============ Formulier ============ */
+function renderSubRows(){
+  const tb=$('#tSub tbody');tb.innerHTML='';
+  S.subtests.forEach((s,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><input list=&quot;dlSub&quot; data-p=&quot;subtests.'+i+'.naam&quot; value=&quot;'+esc(s.naam)+'&quot; style=&quot;min-width:140px&quot;></td>'+
+      '<td><select style=&quot;min-width:104px&quot; data-p=&quot;subtests.'+i+'.domein&quot;>'+Object.entries(DOMEIN).map(([k,v])=>'<option value=&quot;'+k+'&quot;'+(s.domein===k?' selected':'')+'>'+v+'</option>').join('')+'</select></td>'+
+      '<td><input class=&quot;num&quot; inputmode=&quot;numeric&quot; data-p=&quot;subtests.'+i+'.ruw&quot; value=&quot;'+esc(s.ruw)+'&quot;></td>'+
+      '<td><input class=&quot;num&quot; inputmode=&quot;numeric&quot; data-p=&quot;subtests.'+i+'.gs&quot; value=&quot;'+esc(s.gs)+'&quot;></td>'+
+      '<td><input class=&quot;num&quot; inputmode=&quot;decimal&quot; data-p=&quot;subtests.'+i+'.pc&quot; value=&quot;'+esc(s.pc)+'&quot;></td>'+
+      '<td><input class=&quot;le&quot; data-p=&quot;subtests.'+i+'.le&quot; value=&quot;'+esc(s.le)+'&quot; placeholder=&quot;j;m&quot;></td>'+
+      '<td class=&quot;c&quot;><input type=&quot;checkbox&quot; style=&quot;width:auto&quot; data-p=&quot;subtests.'+i+'.kern&quot;'+(s.kern?' checked':'')+'></td>'+
+      '<td class=&quot;lab&quot; data-lab-sub=&quot;'+i+'&quot;></td>'+
+      '<td><button class=&quot;btn small ghost&quot; data-del-sub=&quot;'+i+'&quot; title=&quot;Verwijderen&quot;>✕</button></td>';
+    tb.appendChild(tr);
+  });
+}
+function renderIdxRows(){
+  const tb=$('#tIdx tbody');tb.innerHTML='';
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td style=&quot;font-weight:600&quot;>Kernscore</td>'+
+    '<td><input class=&quot;num&quot; data-p=&quot;kern.som&quot; value=&quot;'+esc(S.kern.som)+'&quot; id=&quot;kernSom&quot;></td>'+
+    '<td><input class=&quot;num&quot; data-p=&quot;kern.ns&quot; value=&quot;'+esc(S.kern.ns)+'&quot;></td>'+
+    '<td><input class=&quot;num&quot; data-p=&quot;kern.pc&quot; value=&quot;'+esc(S.kern.pc)+'&quot;></td>'+
+    '<td><input class=&quot;le&quot; style=&quot;width:80px&quot; data-p=&quot;kern.bi&quot; value=&quot;'+esc(S.kern.bi)+'&quot; placeholder=&quot;bv. 68-80&quot;></td>'+
+    '<td class=&quot;lab&quot; data-lab-kern=&quot;1&quot;></td><td></td>';
+  tb.appendChild(tr);
+  S.indexen.forEach((x,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><input list=&quot;dlIdx&quot; data-p=&quot;indexen.'+i+'.naam&quot; value=&quot;'+esc(x.naam)+'&quot; style=&quot;min-width:160px&quot;></td>'+
+      '<td><input class=&quot;num&quot; data-p=&quot;indexen.'+i+'.som&quot; value=&quot;'+esc(x.som)+'&quot;></td>'+
+      '<td><input class=&quot;num&quot; data-p=&quot;indexen.'+i+'.ns&quot; value=&quot;'+esc(x.ns)+'&quot;></td>'+
+      '<td><input class=&quot;num&quot; data-p=&quot;indexen.'+i+'.pc&quot; value=&quot;'+esc(x.pc)+'&quot;></td>'+
+      '<td><input class=&quot;le&quot; style=&quot;width:80px&quot; data-p=&quot;indexen.'+i+'.bi&quot; value=&quot;'+esc(x.bi)+'&quot;></td>'+
+      '<td class=&quot;lab&quot; data-lab-idx=&quot;'+i+'&quot;></td>'+
+      '<td><button class=&quot;btn small ghost&quot; data-del-idx=&quot;'+i+'&quot; title=&quot;Verwijderen&quot;>✕</button></td>';
+    tb.appendChild(tr);
+  });
+}
+function fillForm(){
+  document.querySelectorAll('[data-p]').forEach(el=>{if(el.closest('#tSub')||el.closest('#tIdx'))return;const v=getP(S,el.dataset.p);if(el.type==='checkbox')el.checked=!!v;else el.value=v??'';});
+  renderSubRows();renderIdxRows();updateLogoUI();
+}
+function chip(lab){return lab?'<span class=&quot;chip '+LABELS[lab].cls+'&quot;>'+LABELS[lab].t+'</span>':'<span class=&quot;chip leeg&quot;>—</span>';}
+
+let A=null;
+function refresh(){
+  A=analyse(S);
+  const lt=A.lt;
+  $('#ageBox').innerHTML=lt?'Leeftijd bij afname: <b>'+lt.j+' jaar '+lt.m+' maanden en '+lt.d+' dagen</b> ('+lt.j+';'+lt.m+')':'Vul geboortedatum en testdatum in om de leeftijd te berekenen.';
+  A.rows.forEach(r=>{
+    const td=document.querySelector('[data-lab-sub=&quot;'+r.i+'&quot;]');if(td)td.innerHTML=chip(r.lab)+(r.z!==null?' <span class=&quot;hint&quot; style=&quot;margin:0&quot;>'+nl(r.z)+' SD</span>':'');
+    const pcEl=document.querySelector('[data-p=&quot;subtests.'+r.i+'.pc&quot;]');if(pcEl)pcEl.placeholder=r.gs!==null&amp;&amp;PCT_SS[r.gs]!==undefined?'≈'+fmtPc(PCT_SS[r.gs]):'';
+  });
+  const tk=document.querySelector('[data-lab-kern]');if(tk)tk.innerHTML=chip(A.kern.lab)+(A.kern.z!==null?' <span class=&quot;hint&quot; style=&quot;margin:0&quot;>'+nl(A.kern.z)+' SD</span>':'');
+  const ks=$('#kernSom');if(ks)ks.placeholder=A.kern.somCalc?String(A.kern.somCalc):'';
+  const kp=document.querySelector('[data-p=&quot;kern.pc&quot;]');if(kp)kp.placeholder=A.kern.ns!==null?'≈'+fmtPc(normCdf(A.kern.z)*100):'';
+  A.idx.forEach(r=>{const td=document.querySelector('[data-lab-idx=&quot;'+r.i+'&quot;]');if(td)td.innerHTML=chip(r.lab);});
+  // controlepunten
+  const all=[...A.errors.map(t=>['err',t]),...A.warnings.map(t=>['w',t])];
+  $('#checks').innerHTML=all.length?'<div class=&quot;checks&quot;><h3>Controlepunten ('+all.length+')</h3><ul>'+all.map(([c,t])=>'<li class=&quot;'+(c==='err'?'err':'')+'&quot;>'+esc(t)+'</li>').join('')+'</ul></div>':'<div class=&quot;checks none&quot;><h3>✓ Geen controlepunten</h3></div>';
+  renderHTML(buildReport(S,A),A);
+  saveDraft();
+  if(hIdx>=0)commitSoon();
+}
+let rT=null;function refreshSoon(){clearTimeout(rT);rT=setTimeout(refresh,120);}
+
+document.addEventListener('input',e=>{
+  const el=e.target;if(!el.dataset||!el.dataset.p)return;
+  const v=el.type==='checkbox'?el.checked:el.value;setP(S,el.dataset.p,v);
+  const m=el.dataset.p.match(/^subtests\.(\d+)\.naam$/);
+  if(m){const s=S.subtests[+m[1]];const k=SUBTESTS.find(x=>x.naam.toLowerCase()===String(v).trim().toLowerCase());
+    if(k){s.code=k.code;s.domein=k.domein;const sel=document.querySelector('[data-p=&quot;subtests.'+m[1]+'.domein&quot;]');if(sel)sel.value=k.domein;}
+    else s.code=String(v).trim().split(/\s+/).filter(Boolean).map(w=>w[0].toUpperCase()).join('').slice(0,4);}
+  refreshSoon();
+});
+document.addEventListener('change',e=>{if(e.target.type==='checkbox'&amp;&amp;e.target.dataset.p){setP(S,e.target.dataset.p,e.target.checked);refreshSoon();}});
+document.addEventListener('click',e=>{
+  const ds=e.target.closest('[data-del-sub]');if(ds){S.subtests.splice(+ds.dataset.delSub,1);renderSubRows();refresh();return;}
+  const di=e.target.closest('[data-del-idx]');if(di){S.indexen.splice(+di.dataset.delIdx,1);renderIdxRows();refresh();}
+});
+$('#bAddSub').onclick=()=>{const used=S.subtests.map(s=>s.code);const nx=SUBTESTS.find(s=>!used.includes(s.code));
+  S.subtests.push(nx?{naam:nx.naam,code:nx.code,domein:nx.domein,ruw:'',gs:'',pc:'',le:'',kern:false}:{naam:'',code:'',domein:'E',ruw:'',gs:'',pc:'',le:'',kern:false});renderSubRows();refresh();};
+$('#bAddIdx').onclick=()=>{const used=S.indexen.map(x=>x.naam);const nx=INDEXES.find(n=>!used.includes(n))||'';S.indexen.push({naam:nx,som:'',ns:'',pc:'',bi:''});renderIdxRows();refresh();};
+function voorbeeldState(){const d=defaults();Object.assign(d.kind,VOORBEELD.kind,{onderzoeker:S.kind.onderzoeker,praktijk:S.kind.praktijk});
+  d.subtests=JSON.parse(JSON.stringify(VOORBEELD.subtests));d.kern={...VOORBEELD.kern};d.reden=VOORBEELD.reden;d.observaties=VOORBEELD.observaties;d.advies=VOORBEELD.advies;d.logo=S.logo;
+  d.conclusie=analyse(d).voorstel;return d;}
+$('#bVoorbeeld').onclick=async()=>{if(hasData()&amp;&amp;!(await ask('De huidige gegevens worden vervangen door het voorbeeld. Doorgaan? (Met ↶ Terug kun je dit ongedaan maken.)')))return;
+  S=voorbeeldState();fillForm();refresh();commitNow();toast('Voorbeeld geladen');};
+$('#bConcl').onclick=()=>{S.conclusie=A.voorstel;$('#taConcl').value=S.conclusie;refresh();commitNow();toast('Voorstel overgenomen. Je kunt het nu aanpassen.',{label:'Ongedaan maken',fn:undo});};
+$('#bWis').onclick=async()=>{if(!(await ask('Alle gegevens van dit dossier wissen? Praktijk, onderzoeker en logo blijven bewaard. Met ↶ Terug kun je dit nog ongedaan maken.')))return;
+  const d=defaults();d.kind.testdatum='';d.subtests.forEach(x=>{x.ruw=x.gs=x.pc=x.le='';});S=d;fillForm();refresh();commitNow();toast('Alle gegevens gewist',{label:'Ongedaan maken',fn:undo});};
+
+/* ============ Stap terug / vooruit ============ */
+let hist=[],hIdx=-1,hT=null;
+function commitNow(){clearTimeout(hT);const j=JSON.stringify(S);if(hist[hIdx]===j)return;hist=hist.slice(0,hIdx+1);hist.push(j);if(hist.length>300)hist.shift();hIdx=hist.length-1;updHist();}
+function commitSoon(){clearTimeout(hT);hT=setTimeout(commitNow,600);}
+function restoreHist(){S=normalise(JSON.parse(hist[hIdx]));fillForm();refresh();updHist();}
+function undo(){commitNow();if(hIdx>0){hIdx--;restoreHist();}}
+function redo(){commitNow();if(hIdx<hist.length-1){hIdx++;restoreHist();}}
+function updHist(){$('#bUndo').disabled=hIdx<=0;$('#bRedo').disabled=hIdx>=hist.length-1;}
+$('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const t=e.target;if(t&amp;&amp;(t.tagName==='INPUT'&amp;&amp;t.type!=='checkbox'||t.tagName==='TEXTAREA'))return;
+  const k=e.key.toLowerCase();if(k==='z'&amp;&amp;!e.shiftKey){e.preventDefault();undo();}else if((k==='z'&amp;&amp;e.shiftKey)||k==='y'){e.preventDefault();redo();}});
+function hasData(){return S.kind.naam||S.kind.voornaam||S.subtests.some(s=>s.gs||s.ruw)||S.kern.ns||S.conclusie;}
+
+/* logo */
+$('#bLogo').onclick=()=>$('#fileLogo').click();
+$('#fileLogo').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{const max=400;const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);S.logo=c.toDataURL('image/png');saveSettings();updateLogoUI();refresh();};img.src=rd.result;};rd.readAsDataURL(f);};
+$('#bLogoDel').onclick=()=>{S.logo='';saveSettings();updateLogoUI();refresh();};
+function updateLogoUI(){$('#logoInfo').innerHTML=S.logo?'<img src=&quot;'+S.logo+'&quot; style=&quot;max-height:34px;vertical-align:middle&quot;>':'Optioneel: logo bovenaan het rapport';$('#bLogoDel').style.display=S.logo?'':'none';}
+
+/* ============ Opslag (lokaal) ============ */
+function saveDraft(){try{localStorage.setItem('celf5nl_concept',JSON.stringify(S));}catch(e){}}
+function loadSettings(){try{return JSON.parse(localStorage.getItem('celf5nl_instellingen')||'{}')||{};}catch(e){return {};}}
+function saveSettings(){try{localStorage.setItem('celf5nl_instellingen',JSON.stringify({praktijk:S.kind.praktijk,onderzoeker:S.kind.onderzoeker,logo:S.logo===DEFAULT_LOGO?'':S.logo,logoUit:!S.logo}));}catch(e){}}
+document.addEventListener('change',e=>{if(e.target.dataset&amp;&amp;(e.target.dataset.p==='kind.praktijk'||e.target.dataset.p==='kind.onderzoeker'))saveSettings();});
+
+function normalise(d){const base=defaults();const o=Object.assign(base,d||{});o.kind=Object.assign(defaults().kind,(d||{}).kind||{});o.kern=Object.assign({som:'',ns:'',pc:'',bi:''},(d||{}).kern||{});o.opties=Object.assign({grafiek:true,analyse:true,controlepunten:false},(d||{}).opties||{});
+  o.subtests=Array.isArray(o.subtests)?o.subtests.map(s=>Object.assign({naam:'',code:'',domein:'E',ruw:'',gs:'',pc:'',le:'',kern:false},s)):[];o.indexen=Array.isArray(o.indexen)?o.indexen:[];
+  ['reden','observaties','conclusie','advies','logo'].forEach(k=>{if(typeof o[k]!=='string')o[k]='';});if(!o.logo&amp;&amp;!loadSettings().logoUit)o.logo=DEFAULT_LOGO;if(!o.kind.onderzoeker)o.kind.onderzoeker=DEFAULT_ONDERZOEKER;if(!o.kind.praktijk)o.kind.praktijk=DEFAULT_PRAKTIJK;return o;}
+
+/* ============ Bestanden opslaan ============ */
+const inFrame=(()=>{try{if(window.parent&amp;&amp;window.parent!==window&amp;&amp;window.parent.__celfShell)return false;return window.self!==window.top;}catch(e){return true;}})();
+let dlP=null;
+function getDownloads(){if(!window.claude||typeof window.claude.use!=='function')return Promise.resolve(null);if(!dlP)dlP=Promise.resolve(window.claude.use('downloads')).catch(()=>null);return dlP;}
+async function saveFile(blob,filename,mime,ext,desc){
+  if(window.showSaveFilePicker&amp;&amp;!inFrame){
+    try{const h=await window.showSaveFilePicker({suggestedName:filename,types:[{description:desc,accept:{[mime]:['.'+ext]}}]});const w=await h.createWritable();await w.write(blob);await w.close();toast('Opgeslagen als '+h.name);return true;}
+    catch(e){if(e&amp;&amp;e.name==='AbortError')return false;}
+  }
+  const dl=await getDownloads();
+  if(dl){try{await dl.save({filename,data:blob});toast('Bestand opgeslagen: '+filename);return true;}catch(e){if(e&amp;&amp;e.code==='declined'){toast('Opslaan geannuleerd');return false;}}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
+  toast('Gedownload: '+filename);return true;
+}
+async function saveDossier(){const obj={app:APP_ID,versie:1,opgeslagen:new Date().toISOString(),data:S};
+  await saveFile(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),fileBase()+'.json','application/json','json','CELF-5-NL dossier');}
+$('#bSave').onclick=e=>{e.stopPropagation();$('#saveMenu').classList.toggle('show');};
+document.addEventListener('click',e=>{if(!e.target.closest('.menuwrap'))$('#saveMenu').classList.remove('show');});
+$('#saveMenu').onclick=async e=>{const b=e.target.closest('[data-save]');if(!b)return;$('#saveMenu').classList.remove('show');
+  try{refresh();const k=b.dataset.save;
+    if(k==='json')await saveDossier();
+    else if(k==='docx')await saveFile(await buildDocx(),fileBase()+'.docx',DOCX_MIME,'docx','Word-document');
+    else await saveFile(await buildPdf(),fileBase()+'.pdf','application/pdf','pdf','PDF-document');
+  }catch(err){console.error(err);toast('Opslaan mislukt: '+err.message);}};
+$('#bOpen').onclick=()=>$('#fileOpen').click();
+$('#fileOpen').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)openFile(f);};
+function openFile(f){const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o.app!==APP_ID||!o.data)throw new Error('geen dossier');S=normalise(o.data);fillForm();refresh();commitNow();toast('Dossier geopend: '+f.name);}catch(err){toast('Dit bestand is geen CELF-5-NL-dossier van deze app.');}};rd.readAsText(f);}
+document.addEventListener('dragover',e=>{if(e.dataTransfer&amp;&amp;[...e.dataTransfer.types].includes('Files')){e.preventDefault();document.body.classList.add('drop');}});
+document.addEventListener('dragleave',e=>{if(e.target===document.documentElement||e.clientX<=0)document.body.classList.remove('drop');});
+document.addEventListener('drop',e=>{document.body.classList.remove('drop');const f=e.dataTransfer&amp;&amp;e.dataTransfer.files[0];if(f&amp;&amp;/\.json$/i.test(f.name)){e.preventDefault();openFile(f);}});
+
+/* ============ DOCX ============ */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&amp;1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC_T[(c^u[i])&amp;0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function zip(files){ // files: [{name, data:Uint8Array}]
+  const enc=new TextEncoder();const parts=[];const cd=[];let off=0;const d=new Date();
+  const dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&amp;0xFFFF, dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&amp;0xFFFF;
+  files.forEach(f=>{const nm=enc.encode(f.name);const crc=crc32(f.data);const sz=f.data.length;
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);h.setUint32(14,crc,true);h.setUint32(18,sz,true);h.setUint32(22,sz,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),nm,f.data);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    cd.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+sz;});
+  const cdSize=cd.reduce((a,u)=>a+u.length,0);
+  const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+function x(s){return String(s??'').replace(/[&amp;<>&quot;]/g,c=>({'&amp;':'&amp;amp;','<':'&amp;lt;','>':'&amp;gt;','&quot;':'&amp;quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');}
+function runs(text,rpr=''){return String(text).split('\n').map((l,i)=>(i?'<w:r><w:br/></w:r>':'')+'<w:r>'+(rpr?'<w:rPr>'+rpr+'</w:rPr>':'')+'<w:t xml:space=&quot;preserve&quot;>'+x(l)+'</w:t></w:r>').join('');}
+function para(text,{style='',rpr='',jc='',ind='',sp='',keep=false}={}){return '<w:p><w:pPr>'+(style?'<w:pStyle w:val=&quot;'+style+'&quot;/>':'')+(keep?'<w:keepNext/>':'')+(sp?'<w:spacing '+sp+'/>':'')+(ind?'<w:ind '+ind+'/>':'')+(jc?'<w:jc w:val=&quot;'+jc+'&quot;/>':'')+'</w:pPr>'+runs(text,rpr)+'</w:p>';}
+const LABHEX={boven:['1D5FA8','E1ECF8'],gem:['2E7D4F','E4F2E8'],grens:['8A6D00','FBF3CF'],zwak:['B45A06','FDE8D3'],ernstig:['B3261E','FBE0DE']};
+function tbl(cols,rows,{header=true,labCol=-1,labs=[],kv=false}={}){
+  const TW=9638;const ws=cols.map(c=>Math.round(TW*c.w/100));
+  const bd='<w:tblBorders>'+['top','left','bottom','right','insideH','insideV'].map(s=>'<w:'+s+' w:val=&quot;single&quot; w:sz=&quot;4&quot; w:space=&quot;0&quot; w:color=&quot;B8C4C9&quot;/>').join('')+'</w:tblBorders>';
+  let o='<w:tbl><w:tblPr><w:tblW w:w=&quot;'+TW+'&quot; w:type=&quot;dxa&quot;/>'+bd+'<w:tblLayout w:type=&quot;fixed&quot;/><w:tblCellMar><w:top w:w=&quot;50&quot; w:type=&quot;dxa&quot;/><w:left w:w=&quot;90&quot; w:type=&quot;dxa&quot;/><w:bottom w:w=&quot;50&quot; w:type=&quot;dxa&quot;/><w:right w:w=&quot;90&quot; w:type=&quot;dxa&quot;/></w:tblCellMar></w:tblPr><w:tblGrid>'+ws.map(w=>'<w:gridCol w:w=&quot;'+w+'&quot;/>').join('')+'</w:tblGrid>';
+  const cell=(t,w,{fill='',b=false,jc='center',color='',keep=false}={})=>'<w:tc><w:tcPr><w:tcW w:w=&quot;'+w+'&quot; w:type=&quot;dxa&quot;/>'+(fill?'<w:shd w:val=&quot;clear&quot; w:color=&quot;auto&quot; w:fill=&quot;'+fill+'&quot;/>':'')+'<w:vAlign w:val=&quot;center&quot;/></w:tcPr><w:p><w:pPr>'+(keep?'<w:keepNext/><w:keepLines/>':'')+'<w:spacing w:before=&quot;0&quot; w:after=&quot;0&quot;/><w:jc w:val=&quot;'+jc+'&quot;/></w:pPr>'+runs(t,(b?'<w:b/>':'')+(color?'<w:color w:val=&quot;'+color+'&quot;/>':'')+'<w:sz w:val=&quot;20&quot;/><w:szCs w:val=&quot;20&quot;/>')+'</w:p></w:tc>';
+  if(header)o+='<w:tr><w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>'+cols.map((c,i)=>cell(c.h,ws[i],{fill:'E8EEF1',b:true,jc:c.l?'left':'center',keep:false})).join('')+'</w:tr>';
+  rows.forEach((r,ri)=>{const keep=false;o+='<w:tr><w:trPr><w:cantSplit/></w:trPr>'+r.map((v,ci)=>{
+    if(kv)return cell(v,ws[ci],{fill:ci===0?'F5F8F9':'',b:ci===0,jc:'left',keep});
+    if(ci===labCol&amp;&amp;labs[ri]){const [fg,bg]=LABHEX[labs[ri]];return cell(v,ws[ci],{fill:bg,b:true,color:fg,keep});}
+    return cell(v,ws[ci],{b:ci===0,jc:cols[ci].l?'left':'center',keep});}).join('')+'</w:tr>';});
+  if(!rows.length)o+='<w:tr>'+'<w:tc><w:tcPr><w:tcW w:w=&quot;'+TW+'&quot; w:type=&quot;dxa&quot;/><w:gridSpan w:val=&quot;'+cols.length+'&quot;/></w:tcPr>'+para('Nog geen scores ingevuld',{rpr:'<w:i/>'})+'</w:tc></w:tr>';
+  return o+'</w:tbl>'+para('',{sp:'w:after=&quot;60&quot;'});
+}
+function imgXml(rid,id,wEmu,hEmu,jc='left'){
+  return '<w:p><w:pPr><w:jc w:val=&quot;'+jc+'&quot;/><w:spacing w:after=&quot;60&quot;/></w:pPr><w:r><w:drawing><wp:inline distT=&quot;0&quot; distB=&quot;0&quot; distL=&quot;0&quot; distR=&quot;0&quot;><wp:extent cx=&quot;'+wEmu+'&quot; cy=&quot;'+hEmu+'&quot;/><wp:docPr id=&quot;'+id+'&quot; name=&quot;Afbeelding '+id+'&quot;/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a=&quot;http://schemas.openxmlformats.org/drawingml/2006/main&quot; noChangeAspect=&quot;1&quot;/></wp:cNvGraphicFramePr><a:graphic xmlns:a=&quot;http://schemas.openxmlformats.org/drawingml/2006/main&quot;><a:graphicData uri=&quot;http://schemas.openxmlformats.org/drawingml/2006/picture&quot;><pic:pic xmlns:pic=&quot;http://schemas.openxmlformats.org/drawingml/2006/picture&quot;><pic:nvPicPr><pic:cNvPr id=&quot;'+id+'&quot; name=&quot;image'+id+'.png&quot;/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed=&quot;'+rid+'&quot;/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x=&quot;0&quot; y=&quot;0&quot;/><a:ext cx=&quot;'+wEmu+'&quot; cy=&quot;'+hEmu+'&quot;/></a:xfrm><a:prstGeom prst=&quot;rect&quot;><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+}
+function dataUrlBytes(u){const b=atob(u.split(',')[1]);const a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+function imgSize(u){return new Promise(r=>{const i=new Image();i.onload=()=>r({w:i.naturalWidth,h:i.naturalHeight});i.onerror=()=>r({w:1,h:1});i.src=u;});}
+async function buildDocx(){
+  const blocks=buildReport(S,A);const imgs=[];let body='';const EMU=9525; // per px @96dpi
+  const keepWrap=inner=>{const TW=9638;return '<w:tbl><w:tblPr><w:tblW w:w=&quot;'+TW+'&quot; w:type=&quot;dxa&quot;/><w:tblBorders>'+['top','left','bottom','right','insideH','insideV'].map(q=>'<w:'+q+' w:val=&quot;nil&quot;/>').join('')+'</w:tblBorders><w:tblLayout w:type=&quot;fixed&quot;/><w:tblCellMar><w:top w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:left w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:bottom w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:right w:w=&quot;0&quot; w:type=&quot;dxa&quot;/></w:tblCellMar></w:tblPr><w:tblGrid><w:gridCol w:w=&quot;'+TW+'&quot;/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w=&quot;'+TW+'&quot; w:type=&quot;dxa&quot;/></w:tcPr>'+inner+'</w:tc></w:tr></w:tbl>';};
+  let heldH='';
+  for(let bi=0;bi<blocks.length;bi++){const b=blocks[bi];const nx=blocks[bi+1];
+    switch(b.t){
+      case 'top':{
+        if(S.logo){const sz=await imgSize(S.logo);const hpx=84,wpx=Math.round(sz.w*hpx/sz.h);const id=imgs.length+1;imgs.push(dataUrlBytes(S.logo));body+=imgXml('rIdImg'+id,id,wpx*EMU,hpx*EMU,'left');}
+        if(S.kind.praktijk&amp;&amp;!S.logo)body+=para(S.kind.praktijk,{jc:'left',rpr:'<w:color w:val=&quot;555555&quot;/><w:sz w:val=&quot;18&quot;/>'});
+        break;}
+      case 'title':body+=para(b.text,{style:'Title'});break;
+      case 'sub':body+=para(b.text,{rpr:'<w:i/><w:color w:val=&quot;555555&quot;/><w:sz w:val=&quot;19&quot;/>',sp:'w:after=&quot;200&quot;'});break;
+      case 'h':if(nx&amp;&amp;(nx.t==='table'||nx.t==='kv'))heldH=para(b.text,{style:'Heading1'}).replace('<w:pStyle w:val=&quot;Heading1&quot;/>','<w:pStyle w:val=&quot;Heading1&quot;/><w:keepNext w:val=&quot;0&quot;/>');else body+=para(b.text,{style:'Heading1'});break;
+      case 'p':body+=para(b.text||'(nog geen conclusie)',b.text?{}:{rpr:'<w:i/><w:color w:val=&quot;999999&quot;/>'});break;
+      case 'legend':body+=para(b.text,{rpr:'<w:color w:val=&quot;666666&quot;/><w:sz w:val=&quot;17&quot;/>'});break;
+      case 'sign':body+=para(b.text,{rpr:'<w:i/>',sp:'w:before=&quot;360&quot;'});break;
+      case 'bullets':b.items.forEach(t=>{body+=para('•\t'+t,{ind:'w:left=&quot;360&quot; w:hanging=&quot;300&quot;',sp:'w:after=&quot;60&quot;'}).replace('<w:pPr>','<w:pPr><w:tabs><w:tab w:val=&quot;left&quot; w:pos=&quot;360&quot;/></w:tabs>');});break;
+      case 'kv':body+=keepWrap(heldH+tbl([{h:'',w:34,l:1},{h:'',w:66,l:1}],b.rows,{header:false,kv:true}));heldH='';break;
+      case 'table':body+=keepWrap(heldH+tbl(b.cols,b.rows,{labCol:b.labCol,labs:b.labs}));heldH='';break;
+      case 'chart':{const c=drawChart(A,2);const u=c.toDataURL('image/png');const id=imgs.length+1;imgs.push(dataUrlBytes(u));const wpx=640,hpx=Math.round(c.height/c.width*wpx);body+=imgXml('rIdImg'+id,id,wpx*EMU,hpx*EMU);break;}
+    }
+  }
+  const NS='xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot; xmlns:r=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships&quot; xmlns:wp=&quot;http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing&quot;';
+  const doc='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><w:document '+NS+'><w:body>'+body+'<w:sectPr><w:footerReference w:type=&quot;default&quot; r:id=&quot;rIdFtr&quot;/><w:pgSz w:w=&quot;11906&quot; w:h=&quot;16838&quot;/><w:pgMar w:top=&quot;1134&quot; w:right=&quot;1134&quot; w:bottom=&quot;1134&quot; w:left=&quot;1134&quot; w:header=&quot;567&quot; w:footer=&quot;567&quot; w:gutter=&quot;0&quot;/></w:sectPr></w:body></w:document>';
+  const ftrTxt='CELF-5-NL'+(volNaam()?' – '+volNaam():'');
+  const fr='<w:rPr><w:color w:val=&quot;777777&quot;/><w:sz w:val=&quot;18&quot;/></w:rPr>';
+  const fld=c=>'<w:r>'+fr+'<w:fldChar w:fldCharType=&quot;begin&quot;/></w:r><w:r>'+fr+'<w:instrText xml:space=&quot;preserve&quot;> '+c+' </w:instrText></w:r><w:r>'+fr+'<w:fldChar w:fldCharType=&quot;separate&quot;/></w:r><w:r>'+fr+'<w:t>1</w:t></w:r><w:r>'+fr+'<w:fldChar w:fldCharType=&quot;end&quot;/></w:r>';
+  const tx=t=>'<w:r>'+fr+'<w:t xml:space=&quot;preserve&quot;>'+x(t)+'</w:t></w:r>';
+  const ftr='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><w:ftr '+NS+'><w:p><w:pPr><w:pBdr><w:top w:val=&quot;single&quot; w:sz=&quot;4&quot; w:space=&quot;4&quot; w:color=&quot;C5CFD3&quot;/></w:pBdr><w:tabs><w:tab w:val=&quot;right&quot; w:pos=&quot;9638&quot;/></w:tabs><w:spacing w:after=&quot;0&quot;/></w:pPr>'+tx(ftrTxt)+'<w:r>'+fr+'<w:tab/></w:r>'+tx('Pagina ')+fld('PAGE')+tx(' van ')+fld('NUMPAGES')+'</w:p></w:ftr>';
+  const styles='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><w:styles xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii=&quot;Calibri&quot; w:hAnsi=&quot;Calibri&quot; w:eastAsia=&quot;Calibri&quot; w:cs=&quot;Calibri&quot;/><w:sz w:val=&quot;22&quot;/><w:szCs w:val=&quot;22&quot;/><w:lang w:val=&quot;nl-BE&quot;/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after=&quot;100&quot; w:line=&quot;264&quot; w:lineRule=&quot;auto&quot;/></w:pPr></w:pPrDefault></w:docDefaults>'+
+    '<w:style w:type=&quot;paragraph&quot; w:default=&quot;1&quot; w:styleId=&quot;Normal&quot;><w:name w:val=&quot;Normal&quot;/><w:qFormat/></w:style>'+
+    '<w:style w:type=&quot;paragraph&quot; w:styleId=&quot;Title&quot;><w:name w:val=&quot;Title&quot;/><w:basedOn w:val=&quot;Normal&quot;/><w:next w:val=&quot;Normal&quot;/><w:qFormat/><w:pPr><w:spacing w:after=&quot;40&quot;/></w:pPr><w:rPr><w:b/><w:color w:val=&quot;3F5F86&quot;/><w:sz w:val=&quot;40&quot;/><w:szCs w:val=&quot;40&quot;/></w:rPr></w:style>'+
+    '<w:style w:type=&quot;paragraph&quot; w:styleId=&quot;Heading1&quot;><w:name w:val=&quot;heading 1&quot;/><w:basedOn w:val=&quot;Normal&quot;/><w:next w:val=&quot;Normal&quot;/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before=&quot;280&quot; w:after=&quot;100&quot;/><w:pBdr><w:bottom w:val=&quot;single&quot; w:sz=&quot;8&quot; w:space=&quot;2&quot; w:color=&quot;6B8CB5&quot;/></w:pBdr><w:outlineLvl w:val=&quot;0&quot;/></w:pPr><w:rPr><w:b/><w:color w:val=&quot;3F5F86&quot;/><w:sz w:val=&quot;27&quot;/><w:szCs w:val=&quot;27&quot;/></w:rPr></w:style>'+
+    '<w:style w:type=&quot;table&quot; w:default=&quot;1&quot; w:styleId=&quot;TableNormal&quot;><w:name w:val=&quot;Normal Table&quot;/><w:tblPr><w:tblInd w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:tblCellMar><w:top w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:left w:w=&quot;108&quot; w:type=&quot;dxa&quot;/><w:bottom w:w=&quot;0&quot; w:type=&quot;dxa&quot;/><w:right w:w=&quot;108&quot; w:type=&quot;dxa&quot;/></w:tblCellMar></w:tblPr></w:style></w:styles>';
+  const ct='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><Types xmlns=&quot;http://schemas.openxmlformats.org/package/2006/content-types&quot;><Default Extension=&quot;rels&quot; ContentType=&quot;application/vnd.openxmlformats-package.relationships+xml&quot;/><Default Extension=&quot;xml&quot; ContentType=&quot;application/xml&quot;/><Default Extension=&quot;png&quot; ContentType=&quot;image/png&quot;/><Override PartName=&quot;/word/document.xml&quot; ContentType=&quot;application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml&quot;/><Override PartName=&quot;/word/styles.xml&quot; ContentType=&quot;application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml&quot;/><Override PartName=&quot;/word/footer1.xml&quot; ContentType=&quot;application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml&quot;/><Override PartName=&quot;/docProps/core.xml&quot; ContentType=&quot;application/vnd.openxmlformats-package.core-properties+xml&quot;/></Types>';
+  const rels='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;><Relationship Id=&quot;rId1&quot; Type=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument&quot; Target=&quot;word/document.xml&quot;/><Relationship Id=&quot;rId2&quot; Type=&quot;http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties&quot; Target=&quot;docProps/core.xml&quot;/></Relationships>';
+  const drels='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;><Relationship Id=&quot;rIdSt&quot; Type=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles&quot; Target=&quot;styles.xml&quot;/><Relationship Id=&quot;rIdFtr&quot; Type=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer&quot; Target=&quot;footer1.xml&quot;/>'+imgs.map((_,i)=>'<Relationship Id=&quot;rIdImg'+(i+1)+'&quot; Type=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships/image&quot; Target=&quot;media/image'+(i+1)+'.png&quot;/>').join('')+'</Relationships>';
+  const core='<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?><cp:coreProperties xmlns:cp=&quot;http://schemas.openxmlformats.org/package/2006/metadata/core-properties&quot; xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:dcterms=&quot;http://purl.org/dc/terms/&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;><dc:title>'+x('Taalonderzoek CELF-5-NL'+(volNaam()?' – '+volNaam():''))+'</dc:title><dc:creator>'+x(S.kind.onderzoeker||'')+'</dc:creator><dcterms:created xsi:type=&quot;dcterms:W3CDTF&quot;>'+new Date().toISOString().replace(/\.\d+Z$/,'Z')+'</dcterms:created></cp:coreProperties>';
+  const enc=new TextEncoder();
+  const files=[{name:'[Content_Types].xml',data:enc.encode(ct)},{name:'_rels/.rels',data:enc.encode(rels)},{name:'docProps/core.xml',data:enc.encode(core)},{name:'word/document.xml',data:enc.encode(doc)},{name:'word/styles.xml',data:enc.encode(styles)},{name:'word/footer1.xml',data:enc.encode(ftr)},{name:'word/_rels/document.xml.rels',data:enc.encode(drels)}];
+  imgs.forEach((d,i)=>files.push({name:'word/media/image'+(i+1)+'.png',data:d}));
+  return zip(files);
+}
+const DOCX_MIME='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+function directDownload(blob,filename){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},60000);}
+$('#bWord').onclick=async()=>{try{refresh();const blob=await buildDocx();const fn=fileBase()+'.docx';
+  if(inFrame){await saveFile(blob,fn,DOCX_MIME,'docx','Word-document');return;}
+  directDownload(blob,fn);toast('Word-bestand klaar: klik op '+fn+' in de downloadbalk van je browser om het in Word te openen.');}catch(e){console.error(e);toast('Word mislukt: '+e.message);}};
+
+/* ============ PDF ============ */
+function pdfTxt(s){return String(s??'').replace(/−/g,'-').replace(/≈/g,'ca.').replace(/≤/g,'<=').replace(/≥/g,'>=').replace(/[‘’]/g,&quot;'&quot;).replace(/[“”]/g,'&quot;').replace(/[^\x00-\xFF€–—•…]/g,'');}
+function pdfTblOpts(b,CW,M){
+  const base={margin:{left:M,right:M},theme:'grid',rowPageBreak:'avoid',styles:{fontSize:9.5,cellPadding:1.8,lineColor:[184,196,201],lineWidth:0.2,textColor:30,valign:'middle'}};
+  if(b.t==='kv')return Object.assign(base,{body:b.rows.map(r=>r.map(pdfTxt)),columnStyles:{0:{cellWidth:CW*0.34,fontStyle:'bold',fillColor:[245,248,249]}}});
+  const LAB={boven:[[29,95,168],[225,236,248]],gem:[[46,125,79],[228,242,232]],grens:[[138,109,0],[251,243,207]],zwak:[[180,90,6],[253,232,211]],ernstig:[[179,38,30],[251,224,222]]};
+  const cs={};b.cols.forEach((c,i)=>cs[i]={cellWidth:CW*c.w/100,halign:c.l?'left':'center'});cs[0].fontStyle='bold';
+  return Object.assign(base,{head:[b.cols.map(c=>pdfTxt(c.h))],body:b.rows.length?b.rows.map(r=>r.map(pdfTxt)):[[{content:'Nog geen scores ingevuld',colSpan:b.cols.length,styles:{fontStyle:'italic',textColor:150}}]],
+    headStyles:{fillColor:[232,238,241],textColor:30,fontStyle:'bold',halign:'center'},columnStyles:cs,
+    didParseCell:d=>{if(d.section==='head'&amp;&amp;b.cols[d.column.index].l)d.cell.styles.halign='left';if(d.section==='body'&amp;&amp;d.column.index===b.labCol&amp;&amp;b.labs[d.row.index]){const [fg,bg]=LAB[b.labs[d.row.index]];d.cell.styles.fillColor=bg;d.cell.styles.textColor=fg;d.cell.styles.fontStyle='bold';}}});
+}
+async function buildPdf(){
+  if(!window.jspdf)throw new Error('PDF-bibliotheek niet geladen');
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const M=18,PW=210,PH=297,CW=PW-2*M;let y=M;
+  const brand=[63,95,134],brand2=[107,140,181];
+  const need=h=>{if(y+h>PH-M-8){doc.addPage();y=M;}};
+  const tblHeight=b=>{const t=new jsPDF({unit:'mm',format:'a4'});t.autoTable(Object.assign(pdfTblOpts(b,CW,M),{startY:0,pageBreak:'auto',margin:{left:M,right:M,top:0,bottom:0}}));return t.lastAutoTable.finalY;};
+  const blocks=buildReport(S,A);
+  for(let bi=0;bi<blocks.length;bi++){const b=blocks[bi];
+    switch(b.t){
+      case 'top':{let h=0;if(S.logo){const sz=await imgSize(S.logo);const lh=22,lw=Math.min(45,sz.w*lh/sz.h);doc.addImage(S.logo,'PNG',M,y,lw,lh);h=lh+1;}
+        if(S.kind.praktijk&amp;&amp;!S.logo){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(90);doc.text(pdfTxt(S.kind.praktijk),M,y+h+3.5);h+=5;}
+        if(h)y+=h+2;break;}
+      case 'title':doc.setFont('helvetica','bold');doc.setFontSize(19);doc.setTextColor(...brand);doc.text(pdfTxt(b.text),M,y+7);y+=11;break;
+      case 'sub':{doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(90);const l=doc.splitTextToSize(pdfTxt(b.text),CW);doc.text(l,M,y+2);y+=l.length*4+5;break;}
+      case 'h':{const nx=blocks[bi+1];let extra=0;if(nx&amp;&amp;nx.t==='chart'){const c=drawChart(A,1);extra=c.height/c.width*CW;}else if(nx&amp;&amp;(nx.t==='table'||nx.t==='kv')){extra=tblHeight(nx);}else if(nx){extra=14;}need(Math.min(15+extra,PH-2*M-6));}y+=4;doc.setFont('helvetica','bold');doc.setFontSize(12.5);doc.setTextColor(...brand);doc.text(pdfTxt(b.text),M,y+4);doc.setDrawColor(...brand2);doc.setLineWidth(0.5);doc.line(M,y+6,PW-M,y+6);y+=10;break;
+      case 'p':case 'legend':case 'sign':{const sz=b.t==='legend'?8.5:10.5;doc.setFont('helvetica',b.t==='sign'?'italic':(b.t==='p'&amp;&amp;!b.text?'italic':'normal'));doc.setFontSize(sz);doc.setTextColor(b.t==='legend'?100:(b.text?30:150));
+        if(b.t==='sign')y+=6;const l=doc.splitTextToSize(pdfTxt(b.text||'(nog geen conclusie)'),CW);const lh=sz*0.43;l.forEach(line=>{need(lh);doc.text(line,M,y+lh*0.8);y+=lh;});y+=2.5;break;}
+      case 'bullets':{doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(30);const lh=4.5;
+        b.items.forEach(t=>{const l=doc.splitTextToSize(pdfTxt(t),CW-6);need(lh*Math.min(l.length,3));doc.text('•',M+1,y+lh*0.8);l.forEach(line=>{need(lh);doc.text(line,M+6,y+lh*0.8);y+=lh;});y+=1.3;});y+=1.5;break;}
+      case 'kv':case 'table':{const h=tblHeight(b);if(h<=PH-2*M-8)need(h);else if(y>M+20)need(PH);doc.autoTable(Object.assign(pdfTblOpts(b,CW,M),{startY:y,pageBreak:h<=PH-2*M-6?'avoid':'auto'}));y=doc.lastAutoTable.finalY+4;break;}
+      case 'chart':{const c=drawChart(A,2);const w=CW,h=c.height/c.width*w;need(h+2);doc.addImage(c.toDataURL('image/png'),'PNG',M,y,w,h);y+=h+2;break;}
+    }
+  }
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(120);doc.setDrawColor(197,207,211);doc.setLineWidth(0.2);doc.line(M,PH-14,PW-M,PH-14);doc.text(pdfTxt('CELF-5-NL'+(volNaam()?' – '+volNaam():'')),M,PH-9.5);doc.text('Pagina '+i+' van '+n,PW-M,PH-9.5,{align:'right'});}
+  doc.setProperties({title:'Taalonderzoek CELF-5-NL'+(volNaam()?' - '+volNaam():''),author:S.kind.onderzoeker||''});
+  return doc.output('blob');
+}
+$('#bPdf').onclick=async()=>{let w=null;if(!inFrame){try{w=window.open('','_blank');if(w){w.document.title='PDF wordt gemaakt…';w.document.body.style.font='15px sans-serif';w.document.body.textContent='PDF wordt gemaakt…';}}catch(e){w=null;}}
+  try{refresh();const blob=await buildPdf();const fn=fileBase()+'.pdf';
+    if(w){w.location.href=URL.createObjectURL(blob);toast('PDF geopend in een nieuw tabblad');return;}
+    await saveFile(blob,fn,'application/pdf','pdf','PDF-document');
+  }catch(e){if(w)w.close();console.error(e);toast('PDF mislukt: '+e.message);}};
+if(!inFrame){$('#bPrint').style.display='';$('#bPrint').onclick=()=>window.print();}
+
+/* ============ UI-hulp ============ */
+let tT=null;
+function toast(msg,action){const t=$('#toast');t.innerHTML='<span>'+esc(msg)+'</span>';if(action){const b=document.createElement('button');b.textContent=action.label;b.onclick=()=>{action.fn();t.classList.remove('show');};t.appendChild(b);}t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),action?6000:3200);}
+function ask(msg){return new Promise(res=>{$('#modalMsg').textContent=msg;$('#modal').classList.add('show');const done=v=>{$('#modal').classList.remove('show');$('#mYes').onclick=$('#mNo').onclick=null;res(v);};$('#mYes').onclick=()=>done(true);$('#mNo').onclick=()=>done(false);});}
+
+/* ============ Start ============ */
+$('#dlSub').innerHTML=SUBTESTS.map(s=>'<option value=&quot;'+esc(s.naam)+'&quot;>').join('');
+$('#dlIdx').innerHTML=INDEXES.map(n=>'<option value=&quot;'+esc(n)+'&quot;>').join('');
+(function init(){
+  let restored=false;
+  if(!inFrame){try{const d=localStorage.getItem('celf5nl_concept');if(d){const c=normalise(JSON.parse(d));const keep=S;S=c;if(hasData())restored=true;else S=keep;}}catch(e){}}
+  if(!restored)S=voorbeeldState();
+  fillForm();refresh();commitNow();
+  if(restored&amp;&amp;hasData())toast('Laatste concept hersteld');
+  setTimeout(getDownloads,0);
+})();
+async function importAfname(a){
+  const same=(S.kind.geboortedatum||'')===(a.geb||'')&amp;&amp;(S.kind.naam||'').trim().toLowerCase()===(a.naam||'').trim().toLowerCase()&amp;&amp;(S.kind.voornaam||'').trim().toLowerCase()===(a.voornaam||'').trim().toLowerCase();
+  if(!same&amp;&amp;hasData()&amp;&amp;!(await ask('Het huidige dossier ('+(volNaam()||'zonder naam')+') wordt vervangen door een nieuw dossier voor '+[a.voornaam,a.naam].filter(Boolean).join(' ')+'. Bewaar eerst het huidige dossier als je het nog nodig hebt. Doorgaan?')))return false;
+  let d;
+  if(same)d=JSON.parse(JSON.stringify(S));
+  else{d=defaults();d.subtests=[];d.logo=S.logo;d.kind.onderzoeker=S.kind.onderzoeker;d.kind.praktijk=S.kind.praktijk;}
+  d.kind.naam=a.naam||'';d.kind.voornaam=a.voornaam||'';d.kind.geboortedatum=a.geb||'';d.kind.testdatum=a.dat||d.kind.testdatum;
+  (a.scores||[]).forEach(sc=>{
+    let s=d.subtests.find(x=>x.code===sc.code);
+    if(!s){const k=SUBTESTS.find(x=>x.code===sc.code);s={naam:k?k.naam:sc.naam,code:sc.code,domein:k?k.domein:'E',ruw:'',gs:'',pc:'',le:'',kern:['ZB','WS','ZF','ZH'].includes(sc.code)};d.subtests.push(s);}
+    s.ruw=String(sc.ruw);
+  });
+  S=normalise(d);fillForm();refresh();commitNow();
+  toast('Ruwe scores uit de afname overgenomen. Vul nu de geschaalde scores in.');
+  return true;
+}
+window.__celf={get S(){return S},set S(v){S=normalise(v);fillForm();refresh();},buildDocx,buildPdf,analyse:()=>A,importAfname,SUBTESTS};
+</script>
+</body>
+</html>
+"></iframe>
 </section>
 
 <!-- MATERIAAL -->
@@ -270,11 +1163,13 @@ function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clear
 function modal(title,html,btns){$('mTitle').textContent=title;$('mBody').innerHTML=html;const b=$('mBtns');b.innerHTML='';return new Promise(res=>{btns.forEach(([t,v,cls])=>{const x=document.createElement('button');x.className='btn '+(cls||'');x.textContent=t;x.onclick=()=>{$('modal').classList.remove('on');res(v)};b.appendChild(x)});$('modal').classList.add('on')})}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+// zelfde subtests en afkortingen als de analyse
 const DEFAULT_ST=[
- ['Zinnen Begrijpen','ZB'],['Linguïstische Concepten','LC'],['Woordstructuur','WS'],['Woordklassen','WK'],
- ['Opdrachten Uitvoeren','OU'],['Formuleren Zinnen','FZ'],['Zinnen Herhalen','ZH'],['Begrijpen Gesproken Tekst','BGT'],
- ['Woordrelaties','WR'],['Semantische Relaties','SR']
+ ['Zinnen Begrijpen','ZB'],['Woordstructuur','WS'],['Zinnen Formuleren','ZF'],['Zinnen Herhalen','ZH'],
+ ['Woordklassen','WK'],['Concepten en Aanwijzingen Volgen','CAV'],['Woorddefinities','WD'],['Semantische Relaties','SR'],
+ ['Zinnen Samenvoegen','ZS'],['Begrijpen van Gesproken Tekst','BGT']
 ];
+const fullName=se=>[se?.voornaam,se?.naam].map(v=>(v||'').trim()).filter(Boolean).join(' ');
 function newSt(naam,afk){return {id:uid(),naam,afk,pdf:'',van:'',tot:'',oefen:0,score:'01',start:1,stopNa:5,credit:true,antw:'sophie',cols:4,rows:1,key:{}}}
 function norm(s){s.antw=s.antw||'sophie';s.cols=s.cols||4;s.rows=s.rows||1;s.key=s.key||{};return s}
 const LET=i=>String.fromCharCode(65+i);
@@ -298,13 +1193,13 @@ async function makeDemo(){
   }
   CFG={pdfs:[{id:pdfId,name:'Demo-stimulusboek (voorbeeldplaten)',pages:n,demo:true}],subtests:DEFAULT_ST.map(([a,b])=>newSt(a,b))};
   Object.assign(CFG.subtests[0],{pdf:pdfId,van:1,tot:12,oefen:2,score:'01',start:1,stopNa:5,antw:'aanwijzen',cols:4,rows:1});
-  Object.assign(CFG.subtests[1],{pdf:pdfId,van:13,tot:24,oefen:1,score:'01',start:1,stopNa:4,antw:'aanwijzen',cols:4,rows:1});
+  Object.assign(CFG.subtests[5],{pdf:pdfId,van:13,tot:24,oefen:1,score:'01',start:1,stopNa:4,antw:'aanwijzen',cols:4,rows:1});
   itemsOf(CFG.subtests[0]).forEach((it,i)=>CFG.subtests[0].key[it.key]=[(i*3+1)%4]);
-  itemsOf(CFG.subtests[1]).forEach((it,i)=>CFG.subtests[1].key[it.key]=i%3===2?[0,(i+2)%4||3]:[(i*5+2)%4]);
+  itemsOf(CFG.subtests[5]).forEach((it,i)=>CFG.subtests[5].key[it.key]=i%3===2?[0,(i+2)%4||3]:[(i*5+2)%4]);
   await saveCfgNoSync();
   const today=new Date().toISOString().slice(0,10);
   const s1=CFG.subtests[0];
-  SES=[{id:uid(),naam:'Voorbeeldkind',geb:'2018-03-14',dat:today,st:{[s1.id]:{scores:{V1:1,V2:1,'1':1,'2':1,'3':0,'4':1,'5':1,'6':0},notes:{'3':'wees B aan'},status:'bezig',pos:8}}}];
+  SES=[{id:uid(),naam:'Janssens',voornaam:'Lotte',geb:'2017-04-10',dat:today,st:{[s1.id]:{scores:{V1:1,V2:1,'1':1,'2':1,'3':0,'4':1,'5':1,'6':0},notes:{'3':'wees B aan'},status:'bezig',pos:8}}}];
   await kvSet('sessions',SES);
 }
 async function saveCfgNoSync(){await kvSet('cfg',CFG)}
@@ -315,7 +1210,7 @@ $('pdfIn').onchange=async e=>{
   const files=[...e.target.files];e.target.value='';if(!files.length)return;
   if(!window.pdfjsLib){modal('PDF-lezer niet beschikbaar','<p>De PDF-lezer kon niet laden. Controleer de internetverbinding (enkel nodig tijdens het inladen) en probeer opnieuw.</p>',[['OK']]);return}
   // demo eruit bij eerste echte boek
-  if(CFG.pdfs.some(p=>p.demo)){await delPagesOf('demo');CFG.pdfs=CFG.pdfs.filter(p=>!p.demo);CFG.subtests.forEach(s=>{if(s.pdf==='demo'){s.pdf='';s.van='';s.tot=''}});SES=SES.filter(s=>s.naam!=='Voorbeeldkind');await saveSes()}
+  if(CFG.pdfs.some(p=>p.demo)){await delPagesOf('demo');CFG.pdfs=CFG.pdfs.filter(p=>!p.demo);CFG.subtests.forEach(s=>{if(s.pdf==='demo'){s.pdf='';s.van='';s.tot=''}});SES=SES.filter(s=>!(s.naam==='Janssens'&&s.voornaam==='Lotte'));await saveSes()}
   $('pdfProg').style.display='block';
   for(const f of files){
     try{
@@ -394,11 +1289,11 @@ async function renderThumbs(){const s=CFG.subtests.find(x=>x.id===$('prevSt').va
 
 /* ============ Sessies ============ */
 function lft(geb,dat){if(!geb||!dat)return'';const a=new Date(geb),b=new Date(dat);let j=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth();if(b.getDate()<a.getDate())m--;if(m<0){j--;m+=12}return j>=0?`${j};${m}`:''}
-function renderSesSel(){const sel=$('sesSel');sel.innerHTML=SES.length?SES.map(s=>`<option value="${s.id}">${esc(s.naam||'(naamloos)')} — ${s.dat||''}</option>`).join(''):'<option value="">Nog geen cliënten</option>';if(curSes)sel.value=curSes.id;else if(SES[0]){curSes=SES[0];sel.value=curSes.id}fillSes()}
-function fillSes(){const on=!!curSes;$('sesFields').style.opacity=on?1:.4;['sesNaam','sesGeb','sesDat'].forEach(i=>$(i).disabled=!on);$('sesNaam').value=curSes?.naam||'';$('sesGeb').value=curSes?.geb||'';$('sesDat').value=curSes?.dat||'';$('sesLft').value=curSes?lft(curSes.geb,curSes.dat):'';renderSetup()}
+function renderSesSel(){const sel=$('sesSel');sel.innerHTML=SES.length?SES.map(s=>`<option value="${s.id}">${esc(fullName(s)||'(naamloos)')} — ${s.dat||''}</option>`).join(''):'<option value="">Nog geen cliënten</option>';if(curSes)sel.value=curSes.id;else if(SES[0]){curSes=SES[0];sel.value=curSes.id}fillSes()}
+function fillSes(){const on=!!curSes;$('sesFields').style.opacity=on?1:.4;['sesNaam','sesVoornaam','sesGeb','sesDat'].forEach(i=>$(i).disabled=!on);$('sesNaam').value=curSes?.naam||'';$('sesVoornaam').value=curSes?.voornaam||'';$('sesGeb').value=curSes?.geb||'';$('sesDat').value=curSes?.dat||'';$('sesLft').value=curSes?lft(curSes.geb,curSes.dat):'';renderSetup()}
 $('sesSel').onchange=()=>{curSes=SES.find(s=>s.id===$('sesSel').value)||null;fillSes()};
-$('newSes').onclick=async()=>{curSes={id:uid(),naam:'',geb:'',dat:new Date().toISOString().slice(0,10),st:{}};SES.unshift(curSes);await saveSes();renderSesSel();$('sesNaam').focus()};
-[['sesNaam','naam'],['sesGeb','geb'],['sesDat','dat']].forEach(([i,k])=>$(i).onchange=async()=>{if(!curSes)return;curSes[k]=$(i).value;$('sesLft').value=lft(curSes.geb,curSes.dat);await saveSes();renderSesSel()});
+$('newSes').onclick=async()=>{curSes={id:uid(),naam:'',voornaam:'',geb:'',dat:new Date().toISOString().slice(0,10),st:{}};SES.unshift(curSes);renderSesSel();$('sesNaam').focus();await saveSes()};
+[['sesNaam','naam'],['sesVoornaam','voornaam'],['sesGeb','geb'],['sesDat','dat']].forEach(([i,k])=>$(i).onchange=async()=>{if(!curSes)return;curSes[k]=$(i).value;$('sesLft').value=lft(curSes.geb,curSes.dat);const o=$('sesSel').querySelector(`option[value="${curSes.id}"]`);if(o)o.textContent=`${fullName(curSes)||'(naamloos)'} — ${curSes.dat||''}`;await saveSes()});
 
 function rawOf(s,r){const its=itemsOf(s).filter(i=>!i.oef);const max=s.score==='012'?2:1;let sum=0;const scored=its.map(i=>r?.scores?.[i.key]);
   its.forEach((it,ix)=>{const v=scored[ix];if(v!=null&&v!=='')sum+=+v;else if(s.credit&&+it.key<s.start)sum+=max});return sum}
@@ -413,12 +1308,12 @@ function renderSetup(){
 let bc=null;try{bc=new BroadcastChannel('celf-kind')}catch(e){}
 let kindOpen=false,advT=null;
 function startRun(stId){
-  const s=norm(CFG.subtests.find(x=>x.id===stId));if(!curSes.naam){toast('Vul eerst de naam van de cliënt in');$('sesNaam').focus();return}
+  const s=norm(CFG.subtests.find(x=>x.id===stId));if(!fullName(curSes)){toast('Vul eerst de naam van de cliënt in');$('sesNaam').focus();return}
   curSes.st[stId]=curSes.st[stId]||{scores:{},notes:{},keuze:{},auto:{},status:'bezig',pos:null};
   const r=curSes.st[stId];r.keuze=r.keuze||{};r.auto=r.auto||{};const its=itemsOf(s);
   if(r.pos==null){r.pos=s.oefen>0?0:Math.max(0,its.findIndex(i=>i.key===String(s.start)))}
   run={s,r,its};$('afSetup').style.display='none';$('afRun').style.display='block';
-  $('runTitle').textContent=s.naam;$('runClient').textContent=`${curSes.naam} · ${lft(curSes.geb,curSes.dat)||''}`;
+  $('runTitle').textContent=s.naam;$('runClient').textContent=`${fullName(curSes)} · ${lft(curSes.geb,curSes.dat)||''}`;
   $('scoreBtns').innerHTML=(s.score==='012'?[0,1,2]:[0,1]).map(v=>`<button data-v="${v}" title="Score van Sophie (overschrijft)">${v}</button>`).join('');
   $('scoreBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>setScore(+b.dataset.v));
   saveSes();showItem();
@@ -501,8 +1396,9 @@ async function initKind(){document.body.classList.add('kindvenster');if(!bc)retu
 function renderRes(){
   const el=$('resList');if(!SES.length){el.innerHTML='<p class="mute">Nog geen afnames.</p>';return}
   el.innerHTML=SES.map(se=>{const rows=CFG.subtests.filter(s=>se.st[s.id]).map(s=>{const r=se.st[s.id];const n=Object.keys(r.notes||{}).length;return `<tr><td>${esc(s.naam)} <span class="mute">${esc(s.afk)}</span></td><td>${r.status==='klaar'?'<span class="pill ok">afgerond</span>':'<span class="pill b">bezig</span>'}</td><td><strong>${rawOf(s,r)}</strong></td><td class="mute">${n?n+' notitie(s)':''}</td></tr>`}).join('');
-    return `<div class="card" style="margin:0 0 12px;padding:14px"><div class="row" style="align-items:center"><strong>${esc(se.naam||'(naamloos)')}</strong><span class="mute">geb. ${se.geb||'?'} · afname ${se.dat||'?'} · leeftijd ${lft(se.geb,se.dat)||'?'}</span><span style="margin-left:auto"></span><button class="btn" data-cp="${se.id}">Kopieer scores</button><button class="btn w" data-rs="${se.id}">Verwijderen</button></div>${rows?`<table style="margin-top:8px"><thead><tr><th>Subtest</th><th>Status</th><th>Ruwe score</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="mute">Nog geen subtests afgenomen.</p>'}</div>`}).join('');
-  el.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const se=SES.find(x=>x.id===b.dataset.cp);const txt=[`${se.naam}\tgeb. ${se.geb}\tafname ${se.dat}\tleeftijd ${lft(se.geb,se.dat)}`,...CFG.subtests.filter(s=>se.st[s.id]).map(s=>`${s.naam}\t${s.afk}\t${rawOf(s,se.st[s.id])}`)].join('\n');try{await navigator.clipboard.writeText(txt);toast('Gekopieerd')}catch(e){modal('Kopiëren',`<textarea style="width:100%;height:160px">${esc(txt)}</textarea>`,[['Sluiten']])}});
+    return `<div class="card" style="margin:0 0 12px;padding:14px"><div class="row" style="align-items:center"><strong>${esc(fullName(se)||'(naamloos)')}</strong><span class="mute">geb. ${se.geb||'?'} · afname ${se.dat||'?'} · leeftijd ${lft(se.geb,se.dat)||'?'}</span><span style="margin-left:auto"></span><button class="btn p" data-ana="${se.id}">Naar analyse</button><button class="btn" data-cp="${se.id}">Kopieer scores</button><button class="btn w" data-rs="${se.id}">Verwijderen</button></div>${rows?`<table style="margin-top:8px"><thead><tr><th>Subtest</th><th>Status</th><th>Ruwe score</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="mute">Nog geen subtests afgenomen.</p>'}</div>`}).join('');
+  el.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const se=SES.find(x=>x.id===b.dataset.cp);const txt=[`${fullName(se)}\tgeb. ${se.geb}\tafname ${se.dat}\tleeftijd ${lft(se.geb,se.dat)}`,...CFG.subtests.filter(s=>se.st[s.id]).map(s=>`${s.naam}\t${s.afk}\t${rawOf(s,se.st[s.id])}`)].join('\n');try{await navigator.clipboard.writeText(txt);toast('Gekopieerd')}catch(e){modal('Kopiëren',`<textarea style="width:100%;height:160px">${esc(txt)}</textarea>`,[['Sluiten']])}});
+  el.querySelectorAll('[data-ana]').forEach(b=>b.onclick=()=>goAnalyse(SES.find(x=>x.id===b.dataset.ana)));
   el.querySelectorAll('[data-rs]').forEach(b=>b.onclick=async()=>{const ok=await modal('Cliënt verwijderen?','<p>Alle scores van deze cliënt worden gewist.</p>',[['Annuleren',false],['Verwijderen',true,'w']]);if(!ok)return;SES=SES.filter(x=>x.id!==b.dataset.rs);if(curSes?.id===b.dataset.rs)curSes=null;await saveSes();renderAll()});
 }
 
@@ -560,16 +1456,34 @@ function banner(){const el=$('globalBanner');const demo=CFG?.pdfs.some(p=>p.demo
   el.innerHTML=h;const b=$('bnRe');if(b)b.onclick=()=>$('dirReconnect').click()}
 
 /* ============ Tabs & start ============ */
-$('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nav').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));['afname','resultaten','materiaal','bewaren'].forEach(t=>$('tab-'+t).style.display=t===b.dataset.tab?'block':'none');if(b.dataset.tab==='materiaal')renderThumbs();if(b.dataset.tab==='bewaren')storeInfo()});
-function renderAll(){renderPdfList();renderMap();renderPrevSel();renderSesSel();renderRes();banner()}
+$('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nav').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));['afname','resultaten','analyse','materiaal','bewaren'].forEach(t=>$('tab-'+t).style.display=t===b.dataset.tab?'block':'none');document.querySelector('main').classList.toggle('wide',b.dataset.tab==='analyse');if(b.dataset.tab==='analyse')renderAnaSel();if(b.dataset.tab==='materiaal')renderThumbs();if(b.dataset.tab==='bewaren')storeInfo()});
+function renderAll(){renderPdfList();renderMap();renderPrevSel();renderSesSel();renderRes();renderAnaSel();banner()}
+
+/* ============ Koppeling met analyse ============ */
+window.__celfShell=true;
+function showTab(t){$('nav').querySelector(`[data-tab="${t}"]`).click()}
+function renderAnaSel(){const sel=$('anaSes');const v=sel.value||curSes?.id;sel.innerHTML=SES.length?SES.map(s=>`<option value="${s.id}">${esc(fullName(s)||'(naamloos)')} — ${s.dat||''}</option>`).join(''):'<option value="">Nog geen afnames</option>';if(v)sel.value=v;$('anaImport').disabled=!SES.length}
+function anaApi(){return new Promise(res=>{const f=$('anaFrame');const t0=Date.now();(function poll(){let api=null;try{api=f.contentWindow&&f.contentWindow.__celf}catch(e){}if(api&&api.importAfname)return res(api);if(Date.now()-t0>15000)return res(null);setTimeout(poll,150)})()})}
+async function goAnalyse(se){
+  if(!se){toast('Kies eerst een cliënt');return}
+  const scores=CFG.subtests.filter(s=>se.st[s.id]).map(s=>({code:s.afk,naam:s.naam,ruw:rawOf(s,se.st[s.id])}));
+  showTab('analyse');$('anaSes').value=se.id;
+  if(!scores.length){toast('Deze cliënt heeft nog geen afgenomen subtests');return}
+  const open=scores.filter(x=>se.st[CFG.subtests.find(s=>s.afk===x.code).id].status!=='klaar');
+  const api=await anaApi();if(!api){modal('Analyse niet bereikbaar','<p>Het analysegedeelte kon niet geladen worden. Herlaad de app en probeer opnieuw.</p>',[['OK']]);return}
+  const ok=await api.importAfname({naam:se.naam||'',voornaam:se.voornaam||'',geb:se.geb||'',dat:se.dat||'',scores});
+  if(ok&&open.length)toast(`Let op: ${open.map(x=>x.code).join(', ')} nog niet afgerond`);
+}
+$('anaImport').onclick=()=>goAnalyse(SES.find(s=>s.id===$('anaSes').value));
+$('toAnaBtn').onclick=()=>goAnalyse(curSes);
 
 (async()=>{
   if(location.hash==='#kindscherm'){initKind();return}
   try{await navigator.storage?.persist?.()}catch(e){}
   try{
     CFG=await kvGet('cfg');SES=(await kvGet('sessions'))||[];if(CFG)CFG.subtests.forEach(norm);
-    if(CFG&&CFG.pdfs.some(p=>p.demo)&&(await kvGet('demoVer'))!==2){await clearStore('pages');await clearStore('sessions');CFG=null;SES=[]}
-    if(!CFG){await makeDemo();await kvSet('demoVer',2)}
+    if(CFG&&CFG.pdfs.some(p=>p.demo)&&(await kvGet('demoVer'))!==3){await clearStore('pages');await clearStore('sessions');CFG=null;SES=[]}
+    if(!CFG){await makeDemo();await kvSet('demoVer',3)}
     try{dirH=await kvGet('dir');if(dirH)dirOK=await verify(dirH,false)}catch(e){dirH=null}
   }catch(e){console.error(e);CFG={pdfs:[],subtests:DEFAULT_ST.map(([a,b])=>newSt(a,b))};$('globalBanner').innerHTML='<div class="banner warn">Opslag in deze browser is niet beschikbaar; gegevens blijven niet bewaard.</div>'}
   renderAll();dirUI();
