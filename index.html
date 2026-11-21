@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CELF-5-NL Digitale Afname · Logopedie Sophie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#23303a;--mute:#6b7780;--line:#e3ded4;--acc:#2f7d6d;--acc2:#e6f2ef;--warn:#b8561f;--warnbg:#fbeee5;--ok:#2f7d4f;--bad:#b23a3a;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Nunito,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0;font-weight:800}
+header h1 small{font-weight:600;color:var(--mute);font-size:13px;margin-left:6px}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{border:0;background:transparent;padding:8px 14px;border-radius:10px;font:inherit;font-weight:700;color:var(--mute);cursor:pointer}
+nav button.on{background:var(--acc2);color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:17px}
+.card h3{margin:14px 0 8px;font-size:15px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--mute)}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+input[type=number]{width:80px}
+.btn{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;color:var(--ink)}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.w{background:var(--warnbg);border-color:#f0cdb6;color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:default}
+.mute{color:var(--mute)}
+.banner{padding:12px 14px;border-radius:12px;margin-bottom:14px;font-weight:600}
+.banner.info{background:var(--acc2);color:#1f5a4e}
+.banner.warn{background:var(--warnbg);color:var(--warn)}
+.banner.ok{background:#e8f4ec;color:var(--ok)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+th{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.03em}
+td input[type=text]{width:100%}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:#eee;color:#555}
+.pill.ok{background:#e1f1e6;color:var(--ok)}.pill.b{background:#fff3d6;color:#8a6200}
+.progress{height:10px;background:#eee;border-radius:99px;overflow:hidden;margin-top:8px}
+.progress>div{height:100%;background:var(--acc);width:0}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:320px;overflow:auto;margin-top:10px}
+.thumbs figure{margin:0;font-size:11px;text-align:center;color:var(--mute)}
+.thumbs img{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff}
+/* afname */
+.stage{display:grid;grid-template-rows:1fr auto;height:calc(100vh - 190px);min-height:480px;gap:12px}
+.plate{background:#fff;border:1px solid var(--line);border-radius:var(--r);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.plate img{max-width:100%;max-height:100%;object-fit:contain}
+.plate .empty{color:var(--mute)}
+.ctrl{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.ctrl .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.itemno{font-size:22px;font-weight:800;min-width:110px}
+.scores{display:flex;gap:8px}
+.scores button{width:58px;height:50px;font-size:20px;font-weight:800;border-radius:12px;border:2px solid var(--line);background:#fff;cursor:pointer}
+.scores button.sel{border-color:var(--acc);background:var(--acc);color:#fff}
+.strip{display:flex;gap:4px;overflow-x:auto;margin-top:10px;padding-bottom:4px}
+.strip span{flex:0 0 auto;min-width:34px;text-align:center;padding:4px 2px;border-radius:7px;font-size:12px;font-weight:700;background:#f1efe9;cursor:pointer}
+.strip span.cur{outline:2px solid var(--acc)}
+.strip span.s0{background:#f7dede;color:var(--bad)}.strip span.s1,.strip span.s2{background:#dcefe3;color:var(--ok)}
+.strip span.oef{font-style:italic;opacity:.75}
+.raw{margin-left:auto;font-weight:800;font-size:16px}
+.pw{position:relative;flex:0 0 auto}
+.pw img{width:100%;height:100%;display:block;max-width:none;max-height:none}
+.ov{position:absolute;inset:0;display:grid}
+.ov button{background:transparent;border:0;margin:0;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+.ov button.tap::after{content:"";position:absolute;inset:6px;border:5px solid rgba(47,125,109,.55);border-radius:14px;background:rgba(47,125,109,.08)}
+.ov button.key::before{content:"";position:absolute;inset:3px;border:3px dashed #2f7d4f;border-radius:12px}
+.ov button .lab{position:absolute;top:6px;left:8px;font-size:12px;font-weight:800;color:#2f7d4f;background:#fff;border-radius:6px;padding:0 5px;opacity:.9}
+.ov.edit button:hover{background:rgba(47,125,109,.06)}
+.ov.edit button.key{background:rgba(47,125,109,.14)}
+.thumbs.big{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));max-height:none}
+.thumbs .pw{width:100%}
+.autoinfo{font-size:14px;font-weight:700;color:var(--acc);min-width:200px}
+.strip span.au{box-shadow:inset 0 -3px 0 var(--acc)}
+body.kindmodus header,body.kindmodus .hide-kind{display:none}
+body.kindmodus main{max-width:none;padding:8px}
+body.kindmodus .stage{height:calc(100vh - 16px)}
+body.kindmodus .ctrl{opacity:.35;transition:opacity .2s;padding:6px 10px}
+body.kindmodus .ctrl:hover,body.kindmodus .ctrl:focus-within{opacity:1}
+body.kindmodus .strip,body.kindmodus .ctrl .note{display:none}
+body.kindmodus .plate{border:0}
+/* kindvenster */
+body.kindvenster{background:#fff}
+body.kindvenster header,body.kindvenster main{display:none}
+#kindView{display:none;position:fixed;inset:0;background:#fff;align-items:center;justify-content:center}
+body.kindvenster #kindView{display:flex}
+
+.modal{position:fixed;inset:0;background:rgba(20,30,35,.45);display:none;align-items:center;justify-content:center;z-index:50}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:16px;padding:22px;max-width:480px;width:92%}
+.modal .box h3{margin-top:0}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23303a;color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;opacity:0;transition:.25s;pointer-events:none;z-index:60}
+.toast.on{opacity:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.statusdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#bbb;margin-right:6px}
+.statusdot.on{background:var(--ok)}
+</style>
+</head>
+<body>
+<header>
+  <h1>CELF-5-NL Afname <small>Logopedie Sophie</small></h1>
+  <nav id="nav">
+    <button data-tab="afname" class="on">Afname</button>
+    <button data-tab="resultaten">Resultaten</button>
+    <button data-tab="materiaal">Testmateriaal</button>
+    <button data-tab="bewaren">Bewaren &amp; herstellen</button>
+  </nav>
+</header>
+
+<main>
+<div id="globalBanner"></div>
+
+<!-- AFNAME -->
+<section id="tab-afname">
+  <div id="afSetup">
+    <div class="card">
+      <h2>Nieuwe of lopende afname</h2>
+      <div class="row">
+        <label>Cliënt<select id="sesSel"></select></label>
+        <button class="btn" id="newSes">+ Nieuwe cliënt</button>
+      </div>
+      <div class="row" id="sesFields" style="margin-top:12px">
+        <label>Naam<input type="text" id="sesNaam" placeholder="Voornaam Naam"></label>
+        <label>Geboortedatum<input type="date" id="sesGeb"></label>
+        <label>Datum afname<input type="date" id="sesDat"></label>
+        <label>Leeftijd<input type="text" id="sesLft" readonly style="width:110px"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Kies een subtest</h2>
+      <table><thead><tr><th>Subtest</th><th>Items</th><th>Status</th><th>Ruwe score</th><th></th></tr></thead><tbody id="stList"></tbody></table>
+    </div>
+  </div>
+
+  <div id="afRun" style="display:none">
+    <div class="row hide-kind" style="margin-bottom:10px">
+      <button class="btn" id="backBtn">← Terug naar overzicht</button>
+      <strong id="runTitle" style="font-size:17px"></strong>
+      <span class="mute" id="runClient"></span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="kindModusBtn">Kindweergave (volledig scherm)</button>
+      <button class="btn" id="kindVensterBtn">Kindscherm in 2e venster</button>
+    </div>
+    <div id="stopBanner"></div>
+    <div class="stage">
+      <div class="plate" id="plate"><span class="empty">Geen plaat</span></div>
+      <div class="ctrl">
+        <div class="top">
+          <button class="btn" id="prevBtn">◀</button>
+          <div class="itemno" id="itemNo">Item 1</div>
+          <div class="scores" id="scoreBtns"></div>
+          <button class="btn" id="nextBtn">▶</button>
+          <input class="note" type="text" id="noteIn" placeholder="Notitie / antwoord van het kind" style="flex:1;min-width:180px">
+          <button class="btn hide-kind" id="redoBtn" title="Antwoord van het kind wissen">Opnieuw</button>
+          <div class="raw">Ruwe score: <span id="rawScore">0</span></div>
+          <button class="btn p" id="finishBtn">Subtest afronden</button>
+        </div>
+        <div class="autoinfo hide-kind" id="autoInfo"></div>
+        <div class="strip" id="strip"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTATEN -->
+<section id="tab-resultaten" style="display:none">
+  <div class="card">
+    <h2>Resultaten per cliënt</h2>
+    <p class="mute" style="margin-top:0">Ruwe scores per subtest. Zet ze over naar de CELF-5-NL Analyse-app om er normscores, het profiel en het verslag van te maken.</p>
+    <div id="resList"></div>
+  </div>
+</section>
+
+<!-- MATERIAAL -->
+<section id="tab-materiaal" style="display:none">
+  <div class="card">
+    <h2>1. PDF's van de stimulusboeken inladen</h2>
+    <p class="mute" style="margin-top:0">Dit gebeurt maar één keer. De pagina's worden omgezet naar afbeeldingen en blijvend in de app bewaard. Ze worden niet geüpload.</p>
+    <div class="row">
+      <input type="file" id="pdfIn" accept="application/pdf" multiple>
+    </div>
+    <div id="pdfProg" style="display:none"><div class="mute" id="pdfProgTxt"></div><div class="progress"><div id="pdfBar"></div></div></div>
+    <h3>Ingeladen boeken</h3>
+    <div id="pdfList" class="mute">Nog niets ingeladen.</div>
+  </div>
+  <div class="card">
+    <h2>2. Pagina's koppelen aan subtests</h2>
+    <p class="mute" style="margin-top:0">Per subtest: welk boek, van welke pagina tot welke pagina, hoeveel oefenitems vooraan, het startitem en de afbreekregel uit de handleiding. Wordt automatisch bewaard.</p>
+    <div style="overflow-x:auto">
+    <table><thead><tr><th>Subtest</th><th>Afk.</th><th>Boek</th><th>Van p.</th><th>Tot p.</th><th>Oefen</th><th>Score</th><th>Startitem</th><th>Stop na ×0</th><th>Antwoord</th><th>Vakken (kol × rij)</th><th></th></tr></thead><tbody id="mapBody"></tbody></table>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="addSt">+ Subtest toevoegen</button></div>
+  </div>
+  <div class="card">
+    <h2>3. Controle en antwoordsleutel</h2>
+    <p class="mute" style="margin-top:0" id="keyHelp">Controleer of elke pagina bij het juiste item staat.</p>
+    <div class="row"><label>Subtest<select id="prevSt"></select></label><span class="mute" id="keyCount"></span></div>
+    <div class="thumbs" id="prevThumbs"></div>
+  </div>
+</section>
+
+<!-- BEWAREN -->
+<section id="tab-bewaren" style="display:none">
+  <div class="grid2">
+    <div class="card">
+      <h2>Automatisch bewaren in een map</h2>
+      <p class="mute" style="margin-top:0">Koppel één keer een map, bij voorkeur in <strong>iCloud Drive</strong>. De app schrijft daar bij elke wijziging het testmateriaal (<code>CELF-pakket.celfpak</code>) en de resultaten (<code>CELF-resultaten.json</code>) weg. Op een nieuwe Mac kies je die map bij <em>Herstellen</em> en is alles terug.</p>
+      <p><span class="statusdot" id="dirDot"></span><span id="dirStatus">Geen map gekoppeld</span></p>
+      <div class="row">
+        <button class="btn p" id="dirLink">Map koppelen</button>
+        <button class="btn" id="dirReconnect" style="display:none">Verbinding herstellen</button>
+        <button class="btn" id="dirSaveNow">Nu bewaren</button>
+      </div>
+      <p class="mute" id="dirSupport" style="font-size:13px"></p>
+    </div>
+    <div class="card">
+      <h2>Herstellen op een nieuwe Mac</h2>
+      <p class="mute" style="margin-top:0">Kies de bewaarmap of het pakketbestand. Testmateriaal, koppelingen en resultaten zijn dan in één keer terug, zonder de PDF opnieuw in te laden.</p>
+      <div class="row">
+        <button class="btn p" id="dirRestore">Herstellen uit bewaarmap</button>
+        <label class="btn" style="flex-direction:row;color:var(--ink);font-size:15px">Pakketbestand kiezen<input type="file" id="pakIn" accept=".celfpak,.json" style="display:none" multiple></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Handmatige reservekopie</h2>
+      <p class="mute" style="margin-top:0">Voor een USB-stick of als de browser geen mappen ondersteunt.</p>
+      <div class="row">
+        <button class="btn" id="expPak">Pakket exporteren (.celfpak)</button>
+        <button class="btn" id="expRes">Resultaten exporteren (.json)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Opslag in deze browser</h2>
+      <p id="storeInfo" class="mute" style="margin-top:0"></p>
+      <div class="row"><button class="btn w" id="wipeBtn">Alles wissen op dit toestel</button></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="kindView"></div>
+
+<div class="modal" id="modal"><div class="box"><h3 id="mTitle"></h3><div id="mBody"></div><div class="row" style="margin-top:16px;justify-content:flex-end" id="mBtns"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ Opslag (IndexedDB) ============ */
+const DBN='celf-digitaal';let _db;
+function db(){return _db||(_db=new Promise((res,rej)=>{const r=indexedDB.open(DBN,1);r.onupgradeneeded=()=>{const d=r.result;['kv','pages','sessions'].forEach(s=>d.objectStoreNames.contains(s)||d.createObjectStore(s))};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+async function tx(store,mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(store,mode);const s=t.objectStore(store);let out;const r=fn(s);if(r)r.onsuccess=()=>out=r.result;t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error)})}
+const kvGet=k=>tx('kv','readonly',s=>s.get(k));
+const kvSet=(k,v)=>tx('kv','readwrite',s=>s.put(v,k));
+const pageGet=id=>tx('pages','readonly',s=>s.get(id));
+const pagePut=(id,v)=>tx('pages','readwrite',s=>s.put(v,id));
+async function allOf(store){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(store,'readonly');const s=t.objectStore(store);const out=[];const c=s.openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){out.push([cur.key,cur.value]);cur.continue()}else res(out)};c.onerror=()=>rej(c.error)})}
+async function clearStore(store){return tx(store,'readwrite',s=>s.clear())}
+async function delPagesOf(pdfId){const d=await db();return new Promise(res=>{const t=d.transaction('pages','readwrite');const s=t.objectStore('pages');const c=s.openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(String(cur.key).startsWith(pdfId+':'))cur.delete();cur.continue()}};t.oncomplete=res})}
+
+/* ============ Status ============ */
+let CFG=null;      // {pdfs:[{id,name,pages,demo}], subtests:[...]}
+let SES=[];        // sessies
+let curSes=null, run=null;
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
+function modal(title,html,btns){$('mTitle').textContent=title;$('mBody').innerHTML=html;const b=$('mBtns');b.innerHTML='';return new Promise(res=>{btns.forEach(([t,v,cls])=>{const x=document.createElement('button');x.className='btn '+(cls||'');x.textContent=t;x.onclick=()=>{$('modal').classList.remove('on');res(v)};b.appendChild(x)});$('modal').classList.add('on')})}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const DEFAULT_ST=[
+ ['Zinnen Begrijpen','ZB'],['Linguïstische Concepten','LC'],['Woordstructuur','WS'],['Woordklassen','WK'],
+ ['Opdrachten Uitvoeren','OU'],['Formuleren Zinnen','FZ'],['Zinnen Herhalen','ZH'],['Begrijpen Gesproken Tekst','BGT'],
+ ['Woordrelaties','WR'],['Semantische Relaties','SR']
+];
+function newSt(naam,afk){return {id:uid(),naam,afk,pdf:'',van:'',tot:'',oefen:0,score:'01',start:1,stopNa:5,credit:true,antw:'sophie',cols:4,rows:1,key:{}}}
+function norm(s){s.antw=s.antw||'sophie';s.cols=s.cols||4;s.rows=s.rows||1;s.key=s.key||{};return s}
+const LET=i=>String.fromCharCode(65+i);
+
+async function saveCfg(){await kvSet('cfg',CFG);scheduleSync('pak')}
+async function saveSes(){await kvSet('sessions',SES);scheduleSync('res')}
+
+/* ============ Demo-materiaal (neutrale voorbeeldplaten) ============ */
+async function makeDemo(){
+  const pdfId='demo';const n=24;
+  const shapes=['cirkel','vierkant','driehoek','ster'];const cols=['#e07a5f','#3d85c6','#81b29a','#f2cc8f'];
+  for(let p=1;p<=n;p++){
+    const c=document.createElement('canvas');c.width=1200;c.height=800;const g=c.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,1200,800);g.strokeStyle='#ddd';g.lineWidth=4;g.strokeRect(10,10,1180,780);
+    for(let q=0;q<4;q++){const x=150+q*300,y=400,sh=(p+q)%4;g.fillStyle=cols[(p*3+q)%4];g.beginPath();
+      if(sh===0)g.arc(x,y,100,0,7);else if(sh===1)g.rect(x-95,y-95,190,190);else if(sh===2){g.moveTo(x,y-110);g.lineTo(x+110,y+90);g.lineTo(x-110,y+90)}else{for(let i=0;i<10;i++){const r=i%2?45:110,a=i*Math.PI/5-Math.PI/2;g.lineTo(x+r*Math.cos(a),y+r*Math.sin(a))}}
+      g.fill();g.fillStyle='#999';g.font='bold 34px Nunito,sans-serif';g.textAlign='center';g.fillText(String.fromCharCode(65+q),x,640)}
+    g.fillStyle='#bbb';g.font='24px Nunito,sans-serif';g.textAlign='left';g.fillText('Voorbeeldplaat '+p+' (demo)',30,50);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+    await pagePut(pdfId+':'+p,{blob,w:1200,h:800});
+  }
+  CFG={pdfs:[{id:pdfId,name:'Demo-stimulusboek (voorbeeldplaten)',pages:n,demo:true}],subtests:DEFAULT_ST.map(([a,b])=>newSt(a,b))};
+  Object.assign(CFG.subtests[0],{pdf:pdfId,van:1,tot:12,oefen:2,score:'01',start:1,stopNa:5,antw:'aanwijzen',cols:4,rows:1});
+  Object.assign(CFG.subtests[1],{pdf:pdfId,van:13,tot:24,oefen:1,score:'01',start:1,stopNa:4,antw:'aanwijzen',cols:4,rows:1});
+  itemsOf(CFG.subtests[0]).forEach((it,i)=>CFG.subtests[0].key[it.key]=[(i*3+1)%4]);
+  itemsOf(CFG.subtests[1]).forEach((it,i)=>CFG.subtests[1].key[it.key]=i%3===2?[0,(i+2)%4||3]:[(i*5+2)%4]);
+  await saveCfgNoSync();
+  const today=new Date().toISOString().slice(0,10);
+  const s1=CFG.subtests[0];
+  SES=[{id:uid(),naam:'Voorbeeldkind',geb:'2018-03-14',dat:today,st:{[s1.id]:{scores:{V1:1,V2:1,'1':1,'2':1,'3':0,'4':1,'5':1,'6':0},notes:{'3':'wees B aan'},status:'bezig',pos:8}}}];
+  await kvSet('sessions',SES);
+}
+async function saveCfgNoSync(){await kvSet('cfg',CFG)}
+
+/* ============ PDF inladen ============ */
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+$('pdfIn').onchange=async e=>{
+  const files=[...e.target.files];e.target.value='';if(!files.length)return;
+  if(!window.pdfjsLib){modal('PDF-lezer niet beschikbaar','<p>De PDF-lezer kon niet laden. Controleer de internetverbinding (enkel nodig tijdens het inladen) en probeer opnieuw.</p>',[['OK']]);return}
+  // demo eruit bij eerste echte boek
+  if(CFG.pdfs.some(p=>p.demo)){await delPagesOf('demo');CFG.pdfs=CFG.pdfs.filter(p=>!p.demo);CFG.subtests.forEach(s=>{if(s.pdf==='demo'){s.pdf='';s.van='';s.tot=''}});SES=SES.filter(s=>s.naam!=='Voorbeeldkind');await saveSes()}
+  $('pdfProg').style.display='block';
+  for(const f of files){
+    try{
+      const buf=await f.arrayBuffer();
+      const doc=await pdfjsLib.getDocument({data:buf}).promise;
+      const id='b'+uid();const n=doc.numPages;
+      for(let p=1;p<=n;p++){
+        $('pdfProgTxt').textContent=`${f.name}: pagina ${p} van ${n} omzetten…`;$('pdfBar').style.width=(p/n*100)+'%';
+        const page=await doc.getPage(p);const v0=page.getViewport({scale:1});const sc=Math.min(2.5,1800/Math.max(v0.width,v0.height));const vp=page.getViewport({scale:sc});
+        const c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);
+        await page.render({canvasContext:g,viewport:vp}).promise;
+        const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.86));
+        await pagePut(id+':'+p,{blob,w:c.width,h:c.height});page.cleanup();
+      }
+      CFG.pdfs.push({id,name:f.name.replace(/\.pdf$/i,''),pages:n});
+      CFG.subtests.forEach(s=>{if(!s.pdf)s.pdf=id});
+      await saveCfg();
+    }catch(err){console.error(err);modal('Inladen mislukt',`<p>${esc(f.name)} kon niet gelezen worden.</p><p class="mute">${esc(err.message||err)}</p>`,[['OK']])}
+  }
+  $('pdfProg').style.display='none';renderAll();toast('Boeken ingeladen en bewaard');
+};
+function renderPdfList(){
+  const el=$('pdfList');
+  if(!CFG.pdfs.length){el.innerHTML='Nog niets ingeladen.';return}
+  el.innerHTML='<table><tbody>'+CFG.pdfs.map(p=>`<tr><td><strong>${esc(p.name)}</strong> ${p.demo?'<span class="pill b">demo</span>':''}</td><td>${p.pages} pagina's</td><td style="text-align:right"><button class="btn" data-del="${p.id}">Verwijderen</button></td></tr>`).join('')+'</tbody></table>';
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const ok=await modal('Boek verwijderen?','<p>De ingeladen pagina\'s van dit boek worden van dit toestel verwijderd.</p>',[['Annuleren',false],['Verwijderen',true,'w']]);if(!ok)return;const id=b.dataset.del;await delPagesOf(id);CFG.pdfs=CFG.pdfs.filter(p=>p.id!==id);CFG.subtests.forEach(s=>{if(s.pdf===id)s.pdf=''});await saveCfg();renderAll()});
+}
+
+/* ============ Koppelingen ============ */
+function renderMap(){
+  const opts=CFG.pdfs.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  $('mapBody').innerHTML=CFG.subtests.map((s,i)=>`<tr data-i="${i}">
+   <td><input type="text" data-k="naam" value="${esc(s.naam)}" style="min-width:150px"></td>
+   <td><input type="text" data-k="afk" value="${esc(s.afk)}" style="width:60px"></td>
+   <td><select data-k="pdf" style="max-width:150px"><option value="">—</option>${opts}</select></td>
+   <td><input type="number" data-k="van" min="1" value="${s.van}" style="width:64px"></td>
+   <td><input type="number" data-k="tot" min="1" value="${s.tot}" style="width:64px"></td>
+   <td><input type="number" data-k="oefen" min="0" value="${s.oefen}" style="width:60px"></td>
+   <td><select data-k="score"><option value="01">0/1</option><option value="012">0/1/2</option></select></td>
+   <td><input type="number" data-k="start" min="1" value="${s.start}" style="width:60px"></td>
+   <td><input type="number" data-k="stopNa" min="0" value="${s.stopNa}" style="width:60px" title="0 = geen afbreekregel"></td>
+   <td><select data-k="antw"><option value="sophie">Sophie scoort</option><option value="aanwijzen">Kind tikt aan, app scoort</option></select></td>
+   <td style="white-space:nowrap"><input type="number" data-k="cols" min="1" max="8" value="${s.cols}" style="width:52px"> × <input type="number" data-k="rows" min="1" max="6" value="${s.rows}" style="width:52px"></td>
+   <td><button class="btn" data-rm="${i}" title="Verwijderen">✕</button></td></tr>`).join('');
+  $('mapBody').querySelectorAll('tr').forEach(tr=>{const s=CFG.subtests[tr.dataset.i];tr.querySelector('[data-k=pdf]').value=s.pdf;tr.querySelector('[data-k=score]').value=s.score;tr.querySelector('[data-k=antw]').value=s.antw});
+  $('mapBody').querySelectorAll('[data-k]').forEach(inp=>inp.onchange=async()=>{const s=CFG.subtests[inp.closest('tr').dataset.i];const k=inp.dataset.k;s[k]=inp.type==='number'?(inp.value===''?'':+inp.value):inp.value;await saveCfg();renderSetup();renderPrevSel();toast('Bewaard')});
+  $('mapBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const ok=await modal('Subtest verwijderen?','',[['Annuleren',false],['Verwijderen',true,'w']]);if(!ok)return;CFG.subtests.splice(+b.dataset.rm,1);await saveCfg();renderAll()});
+}
+$('addSt').onclick=async()=>{CFG.subtests.push(newSt('Nieuwe subtest','—'));await saveCfg();renderMap();renderPrevSel()};
+
+function itemsOf(s){
+  if(!s.pdf||!s.van||!s.tot||s.tot<s.van)return[];
+  const out=[];let k=0;
+  for(let p=s.van;p<=s.tot;p++){if(k<s.oefen){out.push({key:'V'+(k+1),page:p,oef:true})}else out.push({key:String(k-s.oefen+1),page:p,oef:false});k++}
+  return out;
+}
+const pid=(s,it)=>s.pdf+':'+it.page;
+
+/* ============ Controle-thumbs ============ */
+const urlCache=new Map();
+async function pageURL(id){if(urlCache.has(id))return urlCache.get(id);const r=await pageGet(id);if(!r)return null;const u=URL.createObjectURL(r.blob);urlCache.set(id,u);return u}
+function renderPrevSel(){const sel=$('prevSt');const v=sel.value;sel.innerHTML=CFG.subtests.map(s=>`<option value="${s.id}">${esc(s.naam)}</option>`).join('');if(v)sel.value=v;renderThumbs()}
+$('prevSt').onchange=renderThumbs;
+function ovHTML(s,sel,key,showKey,labels){const n=s.cols*s.rows;let h='';for(let i=0;i<n;i++)h+=`<button data-c="${i}" class="${sel?.includes(i)?'tap ':''}${showKey&&key?.includes(i)?'key':''}">${labels?`<span class="lab">${LET(i)}</span>`:''}</button>`;return `<div class="ov" style="grid-template-columns:repeat(${s.cols},1fr);grid-template-rows:repeat(${s.rows},1fr)">${h}</div>`}
+function keyCount(s){const its=itemsOf(s);const k=its.filter(i=>s.key[i.key]?.length).length;$('keyCount').textContent=s.antw==='aanwijzen'?`Sleutel ingevuld voor ${k} van ${its.length} items`:''}
+async function renderThumbs(){const s=CFG.subtests.find(x=>x.id===$('prevSt').value);const el=$('prevThumbs');el.innerHTML='';$('keyCount').textContent='';if(!s)return;norm(s);const its=itemsOf(s);
+  const ed=s.antw==='aanwijzen';el.classList.toggle('big',ed);
+  $('keyHelp').textContent=ed?`Klik per item het juiste vak aan (bij meerdere juiste vakken: allemaal aanklikken; het kind moet ze dan allemaal aantikken). Vakken: ${s.cols} × ${s.rows}, aan te passen in de tabel hierboven. Wordt automatisch bewaard.`:'Controleer of elke pagina bij het juiste item staat. Zet "Antwoord" op "Kind tikt aan" om een antwoordsleutel in te vullen.';
+  if(!its.length){el.innerHTML='<span class="mute">Nog geen pagina\'s gekoppeld.</span>';return}
+  for(const it of its){const f=document.createElement('figure');const u=await pageURL(pid(s,it));
+    f.innerHTML=(u?`<div class="pw"><img src="${u}" alt="">${ed?ovHTML(s,null,s.key[it.key],true,true):''}</div>`:'<div class="mute">ontbreekt</div>')+`<div>${it.oef?'Oefen '+it.key:'Item '+it.key} · p.${it.page}${ed?' · <strong>'+((s.key[it.key]||[]).map(LET).join('+')||'—')+'</strong>':''}</div>`;
+    if(ed)f.querySelector('.ov')?.classList.add('edit');
+    f.querySelectorAll('.ov button').forEach(b=>b.onclick=async()=>{const c=+b.dataset.c;const k=s.key[it.key]||[];const i=k.indexOf(c);if(i>=0)k.splice(i,1);else k.push(c);k.sort((a,b)=>a-b);if(k.length)s.key[it.key]=k;else delete s.key[it.key];b.classList.toggle('key',i<0);f.querySelector('strong').textContent=k.map(LET).join('+')||'—';keyCount(s);await saveCfg()});
+    el.appendChild(f)}
+  keyCount(s)}
+
+/* ============ Sessies ============ */
+function lft(geb,dat){if(!geb||!dat)return'';const a=new Date(geb),b=new Date(dat);let j=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth();if(b.getDate()<a.getDate())m--;if(m<0){j--;m+=12}return j>=0?`${j};${m}`:''}
+function renderSesSel(){const sel=$('sesSel');sel.innerHTML=SES.length?SES.map(s=>`<option value="${s.id}">${esc(s.naam||'(naamloos)')} — ${s.dat||''}</option>`).join(''):'<option value="">Nog geen cliënten</option>';if(curSes)sel.value=curSes.id;else if(SES[0]){curSes=SES[0];sel.value=curSes.id}fillSes()}
+function fillSes(){const on=!!curSes;$('sesFields').style.opacity=on?1:.4;['sesNaam','sesGeb','sesDat'].forEach(i=>$(i).disabled=!on);$('sesNaam').value=curSes?.naam||'';$('sesGeb').value=curSes?.geb||'';$('sesDat').value=curSes?.dat||'';$('sesLft').value=curSes?lft(curSes.geb,curSes.dat):'';renderSetup()}
+$('sesSel').onchange=()=>{curSes=SES.find(s=>s.id===$('sesSel').value)||null;fillSes()};
+$('newSes').onclick=async()=>{curSes={id:uid(),naam:'',geb:'',dat:new Date().toISOString().slice(0,10),st:{}};SES.unshift(curSes);await saveSes();renderSesSel();$('sesNaam').focus()};
+[['sesNaam','naam'],['sesGeb','geb'],['sesDat','dat']].forEach(([i,k])=>$(i).onchange=async()=>{if(!curSes)return;curSes[k]=$(i).value;$('sesLft').value=lft(curSes.geb,curSes.dat);await saveSes();renderSesSel()});
+
+function rawOf(s,r){const its=itemsOf(s).filter(i=>!i.oef);const max=s.score==='012'?2:1;let sum=0;const scored=its.map(i=>r?.scores?.[i.key]);
+  its.forEach((it,ix)=>{const v=scored[ix];if(v!=null&&v!=='')sum+=+v;else if(s.credit&&+it.key<s.start)sum+=max});return sum}
+function renderSetup(){
+  const body=$('stList');if(!CFG)return;
+  body.innerHTML=CFG.subtests.map(s=>{const its=itemsOf(s);const r=curSes?.st?.[s.id];const st=r?.status==='klaar'?'<span class="pill ok">afgerond</span>':r?'<span class="pill b">bezig</span>':'<span class="pill">—</span>';
+    return `<tr><td><strong>${esc(s.naam)}</strong> <span class="mute">${esc(s.afk)}</span></td><td>${its.length?its.filter(i=>!i.oef).length+(s.oefen?` (+${s.oefen} oefen)`:''):'<span class="mute">niet gekoppeld</span>'}</td><td>${st}</td><td>${r?rawOf(s,r):''}</td><td style="text-align:right"><button class="btn ${r?'':'p'}" data-run="${s.id}" ${its.length&&curSes?'':'disabled'}>${r?'Verder':'Start'}</button></td></tr>`}).join('');
+  body.querySelectorAll('[data-run]').forEach(b=>b.onclick=()=>startRun(b.dataset.run));
+}
+
+/* ============ Afname ============ */
+let bc=null;try{bc=new BroadcastChannel('celf-kind')}catch(e){}
+let kindOpen=false,advT=null;
+function startRun(stId){
+  const s=norm(CFG.subtests.find(x=>x.id===stId));if(!curSes.naam){toast('Vul eerst de naam van de cliënt in');$('sesNaam').focus();return}
+  curSes.st[stId]=curSes.st[stId]||{scores:{},notes:{},keuze:{},auto:{},status:'bezig',pos:null};
+  const r=curSes.st[stId];r.keuze=r.keuze||{};r.auto=r.auto||{};const its=itemsOf(s);
+  if(r.pos==null){r.pos=s.oefen>0?0:Math.max(0,its.findIndex(i=>i.key===String(s.start)))}
+  run={s,r,its};$('afSetup').style.display='none';$('afRun').style.display='block';
+  $('runTitle').textContent=s.naam;$('runClient').textContent=`${curSes.naam} · ${lft(curSes.geb,curSes.dat)||''}`;
+  $('scoreBtns').innerHTML=(s.score==='012'?[0,1,2]:[0,1]).map(v=>`<button data-v="${v}" title="Score van Sophie (overschrijft)">${v}</button>`).join('');
+  $('scoreBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>setScore(+b.dataset.v));
+  saveSes();showItem();
+}
+function fitPlate(){const pw=$('plate').querySelector('.pw');if(!pw)return;const img=pw.querySelector('img');if(!img.naturalWidth)return;const P=$('plate').getBoundingClientRect();const sc=Math.min((P.width-8)/img.naturalWidth,(P.height-8)/img.naturalHeight);pw.style.width=img.naturalWidth*sc+'px';pw.style.height=img.naturalHeight*sc+'px'}
+window.addEventListener('resize',()=>{fitPlate();fitKind()});
+const isAuto=s=>s.antw==='aanwijzen';
+async function showItem(){
+  clearTimeout(advT);
+  const {s,r,its}=run;r.pos=Math.max(0,Math.min(its.length-1,r.pos));const it=its[r.pos];
+  $('itemNo').textContent=it.oef?'Oefen '+it.key.slice(1):'Item '+it.key;
+  const u=await pageURL(pid(s,it));const sel=r.keuze[it.key]||[];
+  // Sleutel enkel tonen als het kind op een apart scherm kijkt
+  $('plate').innerHTML=u?`<div class="pw"><img src="${u}" alt="">${isAuto(s)?ovHTML(s,sel,s.key[it.key],kindOpen,kindOpen):''}</div>`:'<span class="empty">Pagina ontbreekt</span>';
+  const img=$('plate').querySelector('img');if(img){img.onload=fitPlate;if(img.complete)fitPlate()}
+  $('plate').querySelectorAll('.ov button').forEach(b=>b.onclick=()=>tap(+b.dataset.c));
+  sendKind();
+  const v=r.scores[it.key];$('scoreBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',v!=null&&+b.dataset.v===+v));
+  $('noteIn').value=r.notes[it.key]||'';
+  $('prevBtn').disabled=r.pos===0;$('nextBtn').disabled=r.pos===its.length-1;
+  $('redoBtn').style.display=isAuto(s)?'':'none';
+  $('rawScore').textContent=rawOf(s,r);
+  const k=s.key[it.key]||[];
+  $('autoInfo').textContent=!isAuto(s)?'Sophie scoort dit item met 0/1'+(s.score==='012'?'/2':'')+'.':!k.length?'Geen antwoordsleutel voor dit item: Sophie scoort.':
+    sel.length?`Kind tikte ${sel.map(LET).join('+')} · sleutel ${k.map(LET).join('+')} → ${v!=null?(r.auto[it.key]?'automatisch ':'door Sophie ')+v:'wacht op '+(k.length-sel.length)+' tik(ken)'}`:`Wacht op het kind${k.length>1?` (${k.length} vakken aantikken)`:''} · sleutel ${k.map(LET).join('+')}`;
+  $('strip').innerHTML=its.map((x,i)=>{const sv=r.scores[x.key];return `<span data-i="${i}" class="${i===r.pos?'cur ':''}${sv!=null?'s'+sv:''} ${x.oef?'oef':''} ${r.auto[x.key]?'au':''}" title="${r.auto[x.key]?'automatisch gescoord':sv!=null?'gescoord door Sophie':''}">${x.key}${sv!=null?'<br>'+sv:'<br>·'}</span>`}).join('');
+  $('strip').querySelectorAll('span').forEach(sp=>sp.onclick=()=>{r.pos=+sp.dataset.i;showItem()});
+  $('strip').querySelector('.cur')?.scrollIntoView({block:'nearest',inline:'center'});
+  checkStop();
+}
+async function tap(c){
+  const {s,r,its}=run;const it=its[r.pos];const k=s.key[it.key]||[];
+  let sel=r.keuze[it.key]||[];
+  if(k.length<=1)sel=[c];else{const i=sel.indexOf(c);if(i>=0)sel.splice(i,1);else sel.push(c)}
+  r.keuze[it.key]=sel;
+  let done=false;
+  if(k.length&&sel.length>=Math.max(1,k.length)){const ok=sel.length===k.length&&k.every(x=>sel.includes(x));const max=s.score==='012'?2:1;r.scores[it.key]=ok?max:0;r.auto[it.key]=true;done=true}
+  await saveSes();await showItem();
+  if(done&&r.pos<its.length-1)advT=setTimeout(()=>{r.pos++;showItem()},900);
+}
+function checkStop(){
+  const {s,r,its}=run;const el=$('stopBanner');el.innerHTML='';if(!s.stopNa)return;
+  let run0=0,hit=false;for(const it of its){if(it.oef)continue;const v=r.scores[it.key];if(v==null)continue;if(+v===0){run0++;if(run0>=s.stopNa){hit=true;break}}else run0=0}
+  if(hit&&r.status!=='klaar')el.innerHTML=`<div class="banner warn hide-kind">Afbreekregel bereikt: ${s.stopNa}× na elkaar 0. Je kunt de subtest afronden. <button class="btn" id="stopFin" style="margin-left:8px">Nu afronden</button></div>`,$('stopFin').onclick=finish;
+}
+async function setScore(v){clearTimeout(advT);const {r,its}=run;const it=its[r.pos];r.scores[it.key]=v;r.auto[it.key]=false;await saveSes();if(r.pos<its.length-1)r.pos++;showItem()}
+$('redoBtn').onclick=async()=>{const {r,its}=run;const k=its[r.pos].key;delete r.keuze[k];delete r.scores[k];delete r.auto[k];await saveSes();showItem()};
+$('noteIn').onchange=async()=>{const {r,its}=run;const k=its[r.pos].key;if($('noteIn').value)r.notes[k]=$('noteIn').value;else delete r.notes[k];await saveSes()};
+$('prevBtn').onclick=()=>{run.r.pos--;showItem()};$('nextBtn').onclick=()=>{run.r.pos++;showItem()};
+async function finish(){clearTimeout(advT);run.r.status='klaar';run.r.raw=rawOf(run.s,run.r);await saveSes();toast(`${run.s.afk} afgerond — ruwe score ${run.r.raw}`);back()}
+$('finishBtn').onclick=finish;
+function back(){clearTimeout(advT);document.body.classList.remove('kindmodus');try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}run=null;try{bc&&bc.postMessage({page:null})}catch(e){};$('afRun').style.display='none';$('afSetup').style.display='block';renderSetup();renderRes()}
+$('backBtn').onclick=back;
+$('kindModusBtn').onclick=()=>{document.body.classList.add('kindmodus');try{document.documentElement.requestFullscreen?.().catch(()=>{})}catch(e){};setTimeout(fitPlate,300);toast('Esc = terug naar gewone weergave')};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)document.body.classList.remove('kindmodus');setTimeout(fitPlate,200)});
+document.addEventListener('keydown',e=>{
+  if(!run||e.target.tagName==='INPUT')return;
+  if(e.key==='Escape'){document.body.classList.remove('kindmodus');setTimeout(fitPlate,100)}
+  if(e.key==='ArrowRight'&&run.r.pos<run.its.length-1){run.r.pos++;showItem()}
+  if(e.key==='ArrowLeft'&&run.r.pos>0){run.r.pos--;showItem()}
+  if(['0','1','2'].includes(e.key)&&(e.key!=='2'||run.s.score==='012'))setScore(+e.key);
+});
+function sendKind(){if(!bc||!run)return;const {s,r,its}=run;const it=its[r.pos];try{bc.postMessage({page:pid(s,it),auto:isAuto(s),cols:s.cols,rows:s.rows,sel:r.keuze[it.key]||[]})}catch(e){}}
+if(bc&&location.hash!=='#kindscherm')bc.onmessage=e=>{if(e.data.hello){kindOpen=true;run&&showItem()}if(e.data.bye){kindOpen=false;run&&showItem()}if(e.data.tap!=null&&run)tap(e.data.tap)};
+$('kindVensterBtn').onclick=()=>{let w=null;try{w=window.open(location.href.split('#')[0]+'#kindscherm','celfkind','width=1200,height=800')}catch(e){}
+  if(!w){modal('Tweede venster niet mogelijk','<p>Deze weergave laat geen tweede venster toe. Open de app als bestand op de Mac en sleep het kindscherm naar het tweede scherm of de iPad (Sidecar). Of gebruik <strong>Kindweergave</strong>.</p>',[['OK']]);return}};
+
+/* kindvenster-modus: kind ziet plaat en tikt aan */
+let KD=null;
+function fitKind(){const pw=$('kindView').querySelector('.pw');if(!pw)return;const img=pw.querySelector('img');if(!img.naturalWidth)return;const sc=Math.min(innerWidth/img.naturalWidth,innerHeight/img.naturalHeight);pw.style.width=img.naturalWidth*sc+'px';pw.style.height=img.naturalHeight*sc+'px'}
+async function initKind(){document.body.classList.add('kindvenster');if(!bc)return;
+  bc.onmessage=async e=>{const d=e.data;if(!('page' in d))return;KD=d;if(!d.page){$('kindView').innerHTML='';return}const u=await pageURL(d.page);
+    $('kindView').innerHTML=u?`<div class="pw"><img src="${u}" alt="">${d.auto?ovHTML({cols:d.cols,rows:d.rows},d.sel,null,false,false):''}</div>`:'';
+    const img=$('kindView').querySelector('img');if(img){img.onload=fitKind;if(img.complete)fitKind()}
+    $('kindView').querySelectorAll('.ov button').forEach(b=>b.onclick=()=>bc.postMessage({tap:+b.dataset.c}))};
+  bc.postMessage({hello:1});addEventListener('beforeunload',()=>bc.postMessage({bye:1}));
+  document.body.ondblclick=()=>document.documentElement.requestFullscreen?.()}
+
+/* ============ Resultaten ============ */
+function renderRes(){
+  const el=$('resList');if(!SES.length){el.innerHTML='<p class="mute">Nog geen afnames.</p>';return}
+  el.innerHTML=SES.map(se=>{const rows=CFG.subtests.filter(s=>se.st[s.id]).map(s=>{const r=se.st[s.id];const n=Object.keys(r.notes||{}).length;return `<tr><td>${esc(s.naam)} <span class="mute">${esc(s.afk)}</span></td><td>${r.status==='klaar'?'<span class="pill ok">afgerond</span>':'<span class="pill b">bezig</span>'}</td><td><strong>${rawOf(s,r)}</strong></td><td class="mute">${n?n+' notitie(s)':''}</td></tr>`}).join('');
+    return `<div class="card" style="margin:0 0 12px;padding:14px"><div class="row" style="align-items:center"><strong>${esc(se.naam||'(naamloos)')}</strong><span class="mute">geb. ${se.geb||'?'} · afname ${se.dat||'?'} · leeftijd ${lft(se.geb,se.dat)||'?'}</span><span style="margin-left:auto"></span><button class="btn" data-cp="${se.id}">Kopieer scores</button><button class="btn w" data-rs="${se.id}">Verwijderen</button></div>${rows?`<table style="margin-top:8px"><thead><tr><th>Subtest</th><th>Status</th><th>Ruwe score</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="mute">Nog geen subtests afgenomen.</p>'}</div>`}).join('');
+  el.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const se=SES.find(x=>x.id===b.dataset.cp);const txt=[`${se.naam}\tgeb. ${se.geb}\tafname ${se.dat}\tleeftijd ${lft(se.geb,se.dat)}`,...CFG.subtests.filter(s=>se.st[s.id]).map(s=>`${s.naam}\t${s.afk}\t${rawOf(s,se.st[s.id])}`)].join('\n');try{await navigator.clipboard.writeText(txt);toast('Gekopieerd')}catch(e){modal('Kopiëren',`<textarea style="width:100%;height:160px">${esc(txt)}</textarea>`,[['Sluiten']])}});
+  el.querySelectorAll('[data-rs]').forEach(b=>b.onclick=async()=>{const ok=await modal('Cliënt verwijderen?','<p>Alle scores van deze cliënt worden gewist.</p>',[['Annuleren',false],['Verwijderen',true,'w']]);if(!ok)return;SES=SES.filter(x=>x.id!==b.dataset.rs);if(curSes?.id===b.dataset.rs)curSes=null;await saveSes();renderAll()});
+}
+
+/* ============ Pakket (binair: kop + afbeeldingen) ============ */
+async function buildPak(){
+  const pages=(await allOf('pages')).filter(([k])=>CFG.pdfs.some(p=>String(k).startsWith(p.id+':')));
+  const meta=[];const blobs=[];let off=0;
+  for(const [k,v] of pages){meta.push({k,w:v.w,h:v.h,o:off,n:v.blob.size,t:v.blob.type});blobs.push(v.blob);off+=v.blob.size}
+  const head=new TextEncoder().encode(JSON.stringify({app:'celf-afname',v:1,datum:new Date().toISOString(),cfg:CFG,pages:meta}));
+  const len=new Uint8Array(4);new DataView(len.buffer).setUint32(0,head.length);
+  return new Blob([new TextEncoder().encode('CELFPAK1'),len,head,...blobs],{type:'application/octet-stream'});
+}
+async function readPak(blob){
+  const buf=await blob.arrayBuffer();const sig=new TextDecoder().decode(new Uint8Array(buf,0,8));if(sig!=='CELFPAK1')throw new Error('Geen geldig CELF-pakket');
+  const hl=new DataView(buf,8,4).getUint32(0);const head=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,12,hl)));const base=12+hl;
+  await clearStore('pages');urlCache.forEach(u=>URL.revokeObjectURL(u));urlCache.clear();
+  for(const m of head.pages){await pagePut(m.k,{blob:new Blob([buf.slice(base+m.o,base+m.o+m.n)],{type:m.t||'image/jpeg'}),w:m.w,h:m.h})}
+  CFG=head.cfg;CFG.subtests.forEach(norm);await saveCfgNoSync();return head;
+}
+function resJSON(){return JSON.stringify({app:'celf-afname-resultaten',v:1,datum:new Date().toISOString(),subtests:CFG.subtests.map(s=>({id:s.id,naam:s.naam,afk:s.afk})),sessies:SES},null,1)}
+async function readRes(txt){const d=JSON.parse(txt);if(!Array.isArray(d.sessies))throw new Error('Geen resultatenbestand');const ids=new Set(SES.map(s=>s.id));d.sessies.forEach(s=>{if(!ids.has(s.id))SES.push(s);else{const i=SES.findIndex(x=>x.id===s.id);SES[i]=s}});await kvSet('sessions',SES)}
+
+function download(blob,name){try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Bestand aangemaakt')}catch(e){modal('Downloaden niet mogelijk','<p>In deze weergave zijn downloads geblokkeerd. In de app op de Mac werkt dit wel.</p>',[['OK']])}}
+$('expPak').onclick=async()=>{if(CFG.pdfs.some(p=>p.demo)&&CFG.pdfs.length===1)toast('Let op: dit is demomateriaal');download(await buildPak(),'CELF-pakket.celfpak')};
+$('expRes').onclick=()=>download(new Blob([resJSON()],{type:'application/json'}),'CELF-resultaten.json');
+$('pakIn').onchange=async e=>{const files=[...e.target.files];e.target.value='';try{for(const f of files){if(/\.celfpak$/i.test(f.name))await readPak(f);else await readRes(await f.text())}SES=(await kvGet('sessions'))||SES;renderAll();toast('Hersteld');scheduleSync('pak');scheduleSync('res')}catch(err){modal('Herstellen mislukt',`<p>${esc(err.message)}</p>`,[['OK']])}};
+
+/* ============ Bewaarmap (File System Access) ============ */
+const FS_OK='showDirectoryPicker' in window;
+let dirH=null,dirOK=false,syncT={};
+async function verify(h,ask){const o={mode:'readwrite'};if((await h.queryPermission(o))==='granted')return true;if(ask&&(await h.requestPermission(o))==='granted')return true;return false}
+function dirUI(){$('dirDot').classList.toggle('on',dirOK);$('dirStatus').textContent=dirH?(dirOK?`Gekoppeld aan map “${dirH.name}” — wordt automatisch bijgewerkt`:`Map “${dirH.name}” gekoppeld, maar toestemming nodig`):'Geen map gekoppeld';$('dirReconnect').style.display=dirH&&!dirOK?'':'none';$('dirSaveNow').disabled=!dirOK;
+  $('dirSupport').textContent=FS_OK?'Tip: kies een map in iCloud Drive, dan staat alles ook meteen op een nieuwe Mac met dezelfde Apple-ID.':'Deze browser ondersteunt geen gekoppelde mappen. Open de app in Google Chrome of Microsoft Edge op de Mac, of gebruik de handmatige reservekopie.';
+  ['dirLink','dirRestore'].forEach(i=>$(i).disabled=!FS_OK);banner()}
+async function writeFile(name,blob){const fh=await dirH.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(blob);await w.close()}
+function scheduleSync(what){if(!dirH||!dirOK)return;clearTimeout(syncT[what]);syncT[what]=setTimeout(()=>doSync(what),what==='pak'?1500:600)}
+async function doSync(what){try{if(what==='pak')await writeFile('CELF-pakket.celfpak',await buildPak());else await writeFile('CELF-resultaten.json',new Blob([resJSON()],{type:'application/json'}));await kvSet('lastSync',new Date().toISOString());storeInfo()}catch(e){console.warn(e);dirOK=false;dirUI()}}
+$('dirLink').onclick=async()=>{try{const h=await showDirectoryPicker({mode:'readwrite',id:'celf'});dirH=h;dirOK=await verify(h,true);await kvSet('dir',h);dirUI();if(dirOK){await doSync('pak');await doSync('res');toast('Map gekoppeld en alles bewaard')}}catch(e){if(e.name!=='AbortError')modal('Koppelen mislukt',`<p>${esc(e.message)}</p>`,[['OK']])}};
+$('dirReconnect').onclick=async()=>{dirOK=await verify(dirH,true);dirUI();if(dirOK){doSync('pak');doSync('res')}};
+$('dirSaveNow').onclick=async()=>{await doSync('pak');await doSync('res');toast('Bewaard in map')};
+$('dirRestore').onclick=async()=>{try{const h=await showDirectoryPicker({mode:'readwrite',id:'celf'});if(!await verify(h,true))return;let got=0;
+  try{const f=await(await h.getFileHandle('CELF-pakket.celfpak')).getFile();await readPak(f);got++}catch(e){if(e.name!=='NotFoundError')throw e}
+  try{const f=await(await h.getFileHandle('CELF-resultaten.json')).getFile();SES=[];await readRes(await f.text());got++}catch(e){if(e.name!=='NotFoundError')throw e}
+  if(!got){modal('Niets gevonden','<p>In deze map staan geen CELF-bestanden. Kies de map waarin de app eerder bewaarde.</p>',[['OK']]);return}
+  dirH=h;dirOK=true;await kvSet('dir',h);SES=(await kvGet('sessions'))||[];curSes=null;renderAll();dirUI();toast('Alles hersteld uit de bewaarmap')}catch(e){if(e.name!=='AbortError')modal('Herstellen mislukt',`<p>${esc(e.message)}</p>`,[['OK']])}};
+
+async function storeInfo(){let t='';try{const p=await navigator.storage?.persisted?.();t+=p?'Blijvende opslag is ingeschakeld: de browser wist deze gegevens niet vanzelf. ':'De browser kan bij plaatsgebrek gegevens opruimen, koppel daarom een bewaarmap. ';const e=await navigator.storage?.estimate?.();if(e)t+=`In gebruik: ${(e.usage/1048576).toFixed(1)} MB. `}catch(e){}const ls=await kvGet('lastSync').catch(()=>null);if(ls)t+=`Laatst bewaard in map: ${new Date(ls).toLocaleString('nl-BE')}.`;$('storeInfo').textContent=t}
+$('wipeBtn').onclick=async()=>{const ok=await modal('Alles wissen op dit toestel?','<p>Testmateriaal, koppelingen en resultaten worden van <strong>dit toestel</strong> gewist. De bestanden in de bewaarmap blijven staan.</p>',[['Annuleren',false],['Alles wissen',true,'w']]);if(!ok)return;await clearStore('pages');await clearStore('kv');await clearStore('sessions');location.reload()};
+
+function banner(){const el=$('globalBanner');const demo=CFG?.pdfs.some(p=>p.demo);let h='';
+  if(demo)h+=`<div class="banner info">Je bekijkt de app met <strong>demomateriaal</strong> (neutrale voorbeeldplaten). Laad bij <em>Testmateriaal</em> de PDF's van de stimulusboeken in, dan verdwijnt de demo.</div>`;
+  else if(CFG&&!CFG.pdfs.length)h+=`<div class="banner warn">Nog geen testmateriaal. Ga naar <em>Testmateriaal</em> om de PDF's één keer in te laden, of herstel een bewaard pakket via <em>Bewaren &amp; herstellen</em>.</div>`;
+  else if(FS_OK&&!dirH)h+=`<div class="banner warn">Testmateriaal staat enkel in deze browser. Koppel bij <em>Bewaren &amp; herstellen</em> een bewaarmap, zodat je het nooit opnieuw hoeft in te laden.</div>`;
+  else if(dirH&&!dirOK)h+=`<div class="banner warn">De bewaarmap heeft opnieuw toestemming nodig. <button class="btn" id="bnRe" style="margin-left:8px">Toestemming geven</button></div>`;
+  el.innerHTML=h;const b=$('bnRe');if(b)b.onclick=()=>$('dirReconnect').click()}
+
+/* ============ Tabs & start ============ */
+$('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nav').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));['afname','resultaten','materiaal','bewaren'].forEach(t=>$('tab-'+t).style.display=t===b.dataset.tab?'block':'none');if(b.dataset.tab==='materiaal')renderThumbs();if(b.dataset.tab==='bewaren')storeInfo()});
+function renderAll(){renderPdfList();renderMap();renderPrevSel();renderSesSel();renderRes();banner()}
+
+(async()=>{
+  if(location.hash==='#kindscherm'){initKind();return}
+  try{await navigator.storage?.persist?.()}catch(e){}
+  try{
+    CFG=await kvGet('cfg');SES=(await kvGet('sessions'))||[];if(CFG)CFG.subtests.forEach(norm);
+    if(CFG&&CFG.pdfs.some(p=>p.demo)&&(await kvGet('demoVer'))!==2){await clearStore('pages');await clearStore('sessions');CFG=null;SES=[]}
+    if(!CFG){await makeDemo();await kvSet('demoVer',2)}
+    try{dirH=await kvGet('dir');if(dirH)dirOK=await verify(dirH,false)}catch(e){dirH=null}
+  }catch(e){console.error(e);CFG={pdfs:[],subtests:DEFAULT_ST.map(([a,b])=>newSt(a,b))};$('globalBanner').innerHTML='<div class="banner warn">Opslag in deze browser is niet beschikbaar; gegevens blijven niet bewaard.</div>'}
+  renderAll();dirUI();
+})();
+</script>
+</body>
+</html>
